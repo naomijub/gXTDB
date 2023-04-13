@@ -1,0 +1,12 @@
+{
+  "details": {
+    "methodFqn": "com.xtdb.protos.GrpcApi.Status"
+  },
+  "requests": [
+    {
+      "location": "Status-request.json"
+    }
+  ],
+  "operationType": "unary",
+  "invokerName": "grpc"
+}

@@ -3,12 +3,20 @@
             [io.pedestal.http.route :as route]
             [io.pedestal.http.body-params :as body-params]
             [ring.util.response :as ring-resp]
+            
+            [gxtdb.adapters.status :as status-adapter]
+
+            ;; -- XTDB -- 
+            [clojure.java.io :as io]
+            [xtdb.api :as xt]
 
             ;; -- PROTOC-GEN-CLOJURE --
             [protojure.pedestal.core :as protojure.pedestal]
             [protojure.pedestal.routes :as proutes]
             [com.example.addressbook.Greeter.server :as greeter]
-            [com.example.addressbook :as addressbook]))
+            [com.example.addressbook :as addressbook]
+            [com.xtdb.protos.GrpcApi.server :as api]
+            [com.xtdb.protos :as protos]))
 
 (defn about-page
   [request]
@@ -43,6 +51,16 @@
     {:status 200
      :body {:message (str "Hello, " name)}}))
 
+(defonce xtdb-node (xt/start-node {}))
+
+(deftype GrpcAPI []
+  api/Service
+  (Status
+    [_this _request]
+    (let [status (xt/status xtdb-node)]
+      {:status 200
+       :body  (status-adapter/edn->grpc status)})))
+
 ;; Defines "/" and "/about" routes with their associated :get handlers.
 ;; The interceptors defined after the verb map (e.g., {:get home-page}
 ;; apply to / and its children (/about).
@@ -54,7 +72,7 @@
 
 ;; -- PROTOC-GEN-CLOJURE --
 ;; Add the routes produced by Greeter->routes
-(def grpc-routes (reduce conj routes (proutes/->tablesyntax {:rpc-metadata greeter/rpc-metadata :interceptors common-interceptors :callback-context (Greeter.)})))
+(def grpc-routes (reduce conj routes (proutes/->tablesyntax {:rpc-metadata api/rpc-metadata :interceptors common-interceptors :callback-context (GrpcAPI.) })))
 
 (def service {:env :prod
               ::http/routes grpc-routes

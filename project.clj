@@ -1,14 +1,15 @@
 (defproject gxtdb "0.0.1-SNAPSHOT"
-  :description "FIXME: write description"
-  :url "http://example.com/FIXME"
-  :license {:name "Apache License 2.0"
-            :url "https://www.apache.org/licenses/LICENSE-2.0"
-            :year 2022
-            :key "apache-2.0"}
+  :description "XTDB gRPC server plugin"
+  :url "https://github.com/naomijub/gXTDB"
+  :license {:name "MIT"
+            :url "https://www.mit.edu/~amini/LICENSE.md"
+            :year 2023
+            :key "mit"}
   :plugins [[lein-cljfmt "0.9.2"]]
   :dependencies [[org.clojure/clojure "1.10.3"]
-                 [com.xtdb/xtdb-core "1.23.1"]
+                 [com.xtdb/xtdb-core "1.22.1"]
                  [io.pedestal/pedestal.service "0.5.9"]
+                 [com.cognitect/anomalies "0.1.12"]
 
                  ;; -- PROTOC-GEN-CLOJURE --
                  [io.github.protojure/grpc-server "2.0.1"]
