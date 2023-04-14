@@ -8,9 +8,9 @@
 ;; From the REPL you can call server/start and server/stop on this service
 (defonce runnable-service (server/create-server service/service))
 
-(defn run-dev
+(defn -run-dev
   "The entry-point for 'lein run-dev'"
-  [& args]
+  [& _args]
   (println "\nCreating your [DEV] server...")
   (-> service/service ;; start with production configuration
       (merge {:env :dev
@@ -31,7 +31,7 @@
 
 (defn -main
   "The entry-point for 'lein run'"
-  [& args]
+  [& _args]
   (println "\nCreating your server...")
   (server/start runnable-service))
 

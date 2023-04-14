@@ -7,25 +7,21 @@
             [gxtdb.adapters.status :as status-adapter]
 
             ;; -- XTDB -- 
-            [clojure.java.io :as io]
             [xtdb.api :as xt]
 
             ;; -- PROTOC-GEN-CLOJURE --
             [protojure.pedestal.core :as protojure.pedestal]
             [protojure.pedestal.routes :as proutes]
-            [com.example.addressbook.Greeter.server :as greeter]
-            [com.example.addressbook :as addressbook]
-            [com.xtdb.protos.GrpcApi.server :as api]
-            [com.xtdb.protos :as protos]))
+            [com.xtdb.protos.GrpcApi.server :as api]))
 
 (defn about-page
-  [request]
+  [_request]
   (ring-resp/response (format "Clojure %s - served from %s"
                               (clojure-version)
                               (route/url-for ::about-page))))
 
 (defn home-page
-  [request]
+  [_request]
   (ring-resp/response "Hello from gxtdb, backed by Protojure Template!"))
 
 ;; -- PROTOC-GEN-CLOJURE --
@@ -43,13 +39,12 @@
 ;;
 ;; see http://pedestal.io/reference/request-map
 
-
-(deftype Greeter []
-  greeter/Service
-  (Hello
-    [this {{:keys [name]} :grpc-params :as request}]
-    {:status 200
-     :body {:message (str "Hello, " name)}}))
+;; (deftype Greeter []
+;;   greeter/Service
+;;   (Hello
+;;     [this {{:keys [name]} :grpc-params :as request}]
+;;     {:status 200
+;;      :body {:message (str "Hello, " name)}}))
 
 (defonce xtdb-node (xt/start-node {}))
 
@@ -58,6 +53,7 @@
   (Status
     [_this _request]
     (let [status (xt/status xtdb-node)]
+      (println (str "\n" status "\n"))
       {:status 200
        :body  (status-adapter/edn->grpc status)})))
 

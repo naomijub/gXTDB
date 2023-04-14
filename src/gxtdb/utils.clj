@@ -8,7 +8,7 @@
 (defn assoc-some-str
   "Associates a key with a value in a map, if and only if the value is not nil."
   ([m k v]
-   (if (nil? v) [:value {:none {}}] (assoc m k [:value {:some v}]))))
+   (if (nil? v) (assoc m k {:value {:none {}}}) (assoc m k {:value {:some v}}))))
 
 (defn assoc-with-fn
   "Associates a key in a map if funtion applied to value is a non nil return"
