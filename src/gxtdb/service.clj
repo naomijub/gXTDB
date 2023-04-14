@@ -46,14 +46,13 @@
 ;;     {:status 200
 ;;      :body {:message (str "Hello, " name)}}))
 
-(defonce xtdb-node (xt/start-node {}))
+(defonce xtdb-in-memory-node (xt/start-node {}))
 
-(deftype GrpcAPI []
+(deftype GrpcAPI [xtdb-node]
   api/Service
   (Status
     [_this _request]
     (let [status (xt/status xtdb-node)]
-      (println (str "\n" status "\n"))
       {:status 200
        :body  (status-adapter/edn->grpc status)})))
 
@@ -68,10 +67,11 @@
 
 ;; -- PROTOC-GEN-CLOJURE --
 ;; Add the routes produced by Greeter->routes
-(def grpc-routes (reduce conj routes (proutes/->tablesyntax {:rpc-metadata api/rpc-metadata :interceptors common-interceptors :callback-context (GrpcAPI.) })))
+(defn grpc-routes [xtdb-node] (reduce conj routes (proutes/->tablesyntax {:rpc-metadata api/rpc-metadata :interceptors common-interceptors :callback-context (GrpcAPI. xtdb-node) })))
 
-(def service {:env :prod
-              ::http/routes grpc-routes
+(defn service [xtdb-node] 
+             {:env :prod
+              ::http/routes (grpc-routes xtdb-node)
 
               ;; -- PROTOC-GEN-CLOJURE --
               ;; We override the chain-provider with one provided by protojure.protobuf

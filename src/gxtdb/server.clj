@@ -1,18 +1,18 @@
 (ns gxtdb.server
   (:gen-class) ; for -main method in uberjar
-  (:require [io.pedestal.http :as server]
-            [io.pedestal.http.route :as route]
-            [gxtdb.service :as service]))
+  (:require [gxtdb.service :as service :refer [xtdb-in-memory-node]]
+            [io.pedestal.http :as server]
+            [io.pedestal.http.route :as route]))
 
 ;; This is an adapted service map, that can be started and stopped
 ;; From the REPL you can call server/start and server/stop on this service
-(defonce runnable-service (server/create-server service/service))
+(defn runnable-service [xtdb-node] (-> xtdb-node service/service server/create-server ))
 
 (defn -run-dev
   "The entry-point for 'lein run-dev'"
   [& _args]
   (println "\nCreating your [DEV] server...")
-  (-> service/service ;; start with production configuration
+  (-> (service/service xtdb-in-memory-node) ;; start with production configuration
       (merge {:env :dev
               ;; do not block thread that starts web server
               ::server/join? false
@@ -33,7 +33,7 @@
   "The entry-point for 'lein run'"
   [& _args]
   (println "\nCreating your server...")
-  (server/start runnable-service))
+  (server/start (runnable-service xtdb-in-memory-node)))
 
 ;; If you package the service up as a WAR,
 ;; some form of the following function sections is required (for io.pedestal.servlet.ClojureVarServlet).
