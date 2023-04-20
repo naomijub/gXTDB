@@ -3,21 +3,25 @@
             [io.pedestal.http.route :as route]
             [io.pedestal.http.body-params :as body-params]
             [ring.util.response :as ring-resp]
+            
+            [gxtdb.adapters.status :as status-adapter]
+
+            ;; -- XTDB -- 
+            [xtdb.api :as xt]
 
             ;; -- PROTOC-GEN-CLOJURE --
             [protojure.pedestal.core :as protojure.pedestal]
             [protojure.pedestal.routes :as proutes]
-            [com.example.addressbook.Greeter.server :as greeter]
-            [com.example.addressbook :as addressbook]))
+            [com.xtdb.protos.GrpcApi.server :as api]))
 
 (defn about-page
-  [request]
+  [_request]
   (ring-resp/response (format "Clojure %s - served from %s"
                               (clojure-version)
                               (route/url-for ::about-page))))
 
 (defn home-page
-  [request]
+  [_request]
   (ring-resp/response "Hello from gxtdb, backed by Protojure Template!"))
 
 ;; -- PROTOC-GEN-CLOJURE --
@@ -35,13 +39,22 @@
 ;;
 ;; see http://pedestal.io/reference/request-map
 
+;; (deftype Greeter []
+;;   greeter/Service
+;;   (Hello
+;;     [this {{:keys [name]} :grpc-params :as request}]
+;;     {:status 200
+;;      :body {:message (str "Hello, " name)}}))
 
-(deftype Greeter []
-  greeter/Service
-  (Hello
-    [this {{:keys [name]} :grpc-params :as request}]
-    {:status 200
-     :body {:message (str "Hello, " name)}}))
+(defonce xtdb-in-memory-node (xt/start-node {}))
+
+(deftype GrpcAPI [xtdb-node]
+  api/Service
+  (Status
+    [_this _request]
+    (let [status (xt/status xtdb-node)]
+      {:status 200
+       :body  (status-adapter/edn->grpc status)})))
 
 ;; Defines "/" and "/about" routes with their associated :get handlers.
 ;; The interceptors defined after the verb map (e.g., {:get home-page}
@@ -54,10 +67,11 @@
 
 ;; -- PROTOC-GEN-CLOJURE --
 ;; Add the routes produced by Greeter->routes
-(def grpc-routes (reduce conj routes (proutes/->tablesyntax {:rpc-metadata greeter/rpc-metadata :interceptors common-interceptors :callback-context (Greeter.)})))
+(defn grpc-routes [xtdb-node] (reduce conj routes (proutes/->tablesyntax {:rpc-metadata api/rpc-metadata :interceptors common-interceptors :callback-context (GrpcAPI. xtdb-node) })))
 
-(def service {:env :prod
-              ::http/routes grpc-routes
+(defn service [xtdb-node] 
+             {:env :prod
+              ::http/routes (grpc-routes xtdb-node)
 
               ;; -- PROTOC-GEN-CLOJURE --
               ;; We override the chain-provider with one provided by protojure.protobuf

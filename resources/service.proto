@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package com.xtdb.protos;
+
+message Empty { }
+
+message OptionString {
+  oneof value {
+    Empty none = 1;
+    string some = 2;
+  }
+}
+
+message StatusResponse {
+    string version = 1;
+    int32 index_version = 2;
+    string kv_store = 3;
+    int32 estimate_num_keys = 4;
+    int64 size = 5;
+    OptionString revision = 6;
+    OptionString consumer_state = 7;
+}
+
+service GrpcApi {
+  rpc Status (Empty) returns (StatusResponse);
+}

@@ -1,10 +1,10 @@
 {
   "details": {
-    "methodFqn": "com.example.addressbook.Greeter.Hello"
+    "methodFqn": "com.xtdb.protos.GrpcApi.Status"
   },
   "requests": [
     {
-      "location": "Hello-request.json"
+      "location": "status-request.json"
     }
   ],
   "operationType": "unary",
