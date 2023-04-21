@@ -39,12 +39,6 @@
 ;;
 ;; see http://pedestal.io/reference/request-map
 
-;; (deftype Greeter []
-;;   greeter/Service
-;;   (Hello
-;;     [this {{:keys [name]} :grpc-params :as request}]
-;;     {:status 200
-;;      :body {:message (str "Hello, " name)}}))
 
 (defonce xtdb-in-memory-node (xt/start-node {}))
 

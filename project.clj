@@ -22,6 +22,8 @@
   :min-lein-version "2.0.0"
   :resource-paths ["config", "resources"]
   :profiles {:dev {:aliases {"run-dev" ["trampoline" "run" "-m" "gxtdb.server/run-dev"]}
-                   :dependencies [[io.pedestal/pedestal.service-tools "0.5.9"]]}
+                   :dependencies [[io.pedestal/pedestal.service-tools "0.5.9"]
+                                  [protojure "1.7.3"]
+                                  [io.github.protojure/grpc-client "2.6.1"]]}
              :uberjar {:aot [gxtdb.server]}}
   :main ^{:skip-aot true} gxtdb.server)

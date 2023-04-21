@@ -8,7 +8,7 @@
 ;; From the REPL you can call server/start and server/stop on this service
 (defn runnable-service [xtdb-node] (-> xtdb-node service/service server/create-server ))
 
-(defn -run-dev
+(defn -run-test
   "The entry-point for 'lein run-dev'"
   [& _args]
   (println "\nCreating your [DEV] server...")

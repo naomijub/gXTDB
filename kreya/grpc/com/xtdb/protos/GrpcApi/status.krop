@@ -1,6 +1,7 @@
 {
   "details": {
-    "methodFqn": "com.xtdb.protos.GrpcApi.Status"
+    "methodFqn": "com.xtdb.protos.GrpcApi.Status",
+    "mode": "grpc"
   },
   "requests": [
     {
