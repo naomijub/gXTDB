@@ -26,6 +26,5 @@
                :input   {:f com.xtdb.protos/new-Empty :ch input}
                :output  {:f com.xtdb.protos/pb->StatusResponse :ch output}
                :metadata metadata}]
-     (-> (send-unary-params input params)
-         (p/then (fn [_] (invoke-unary client desc output)))))))
+     (p/then (send-unary-params input params) (fn [_] (invoke-unary client desc output))))))
 

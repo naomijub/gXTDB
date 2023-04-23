@@ -21,10 +21,11 @@ jobs:
   formatter:
 
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v3
     - name: Install dependencies
       run: lein deps
     - name: Run cljfmt
       run: lein cljfmt check
+    - name: Run kibit
+      run: lein kibit
