@@ -2,6 +2,18 @@
 
 gRPC Plugin for XTDB
 
+## Usage:
+
+1. Install [leiningen](https://leiningen.org/)
+2. execute `make all` after making changes to the `*.proto` files in `resources/`
+
+* Execute server: `lein run`
+* Run tests: `lein test`
+* Format code, Check: `lein cljfmt check`, Fix: `lein cljfmt fix`
+* Lint code, Check: `lein kibit`, Fix: `lein kibit --replace`
+
+
+# Protojure stuff
 ## Usage
 This is the output of a `lein new protojure` template run. The output is a set of sample
 files demonstrating the use of the protojure lib + protoc plugin to expose a GRPC service.
