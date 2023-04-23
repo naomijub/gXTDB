@@ -1,5 +1,5 @@
 (ns gxtdb.adapters.status
-    (:require [gxtdb.utils :as utils]))
+  (:require [gxtdb.utils :as utils]))
 
 (defn edn->grpc [edn]
   (->

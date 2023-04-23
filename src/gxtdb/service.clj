@@ -3,7 +3,7 @@
             [io.pedestal.http.route :as route]
             [io.pedestal.http.body-params :as body-params]
             [ring.util.response :as ring-resp]
-            
+
             [gxtdb.adapters.status :as status-adapter]
 
             ;; -- XTDB -- 
@@ -39,7 +39,6 @@
 ;;
 ;; see http://pedestal.io/reference/request-map
 
-
 (defonce xtdb-in-memory-node (xt/start-node {}))
 
 (deftype GrpcAPI [xtdb-node]
@@ -61,11 +60,11 @@
 
 ;; -- PROTOC-GEN-CLOJURE --
 ;; Add the routes produced by Greeter->routes
-(defn grpc-routes [xtdb-node] (reduce conj routes (proutes/->tablesyntax {:rpc-metadata api/rpc-metadata :interceptors common-interceptors :callback-context (GrpcAPI. xtdb-node) })))
+(defn grpc-routes [xtdb-node] (reduce conj routes (proutes/->tablesyntax {:rpc-metadata api/rpc-metadata :interceptors common-interceptors :callback-context (GrpcAPI. xtdb-node)})))
 
-(defn service [xtdb-node] 
-             {:env :prod
-              ::http/routes (grpc-routes xtdb-node)
+(defn service [xtdb-node]
+  {:env :prod
+   ::http/routes (grpc-routes xtdb-node)
 
               ;; -- PROTOC-GEN-CLOJURE --
               ;; We override the chain-provider with one provided by protojure.protobuf
@@ -73,8 +72,8 @@
               ;; for HTTP/2 trailers, which GRPCs rely on.  A future version of pedestal
               ;; may provide this support, in which case we can go back to using
               ;; chain-providers from pedestal.
-              ::http/type protojure.pedestal/config
-              ::http/chain-provider protojure.pedestal/provider
+   ::http/type protojure.pedestal/config
+   ::http/chain-provider protojure.pedestal/provider
 
               ;;::http/host "localhost"
-              ::http/port 8080})
+   ::http/port 8080})

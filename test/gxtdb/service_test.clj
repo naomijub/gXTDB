@@ -12,7 +12,6 @@
 
 (def xtdb-server (service/grpc-routes  (xt/start-node *opts*)))
 
-
 (def test-env (atom {}))
 
 (defn create-service []
@@ -39,7 +38,7 @@
 (use-fixtures :each wrap-service)
 (deftest status-test
   (testing "Status return xtdb with MemKv"
-    (is (= 
-        (:kv-store @(Status @(connect {:uri (str "http://localhost:" (:port @test-env))}) {}))
-        "xtdb.mem_kv.MemKv"))))
+    (is (=
+         (:kv-store @(Status @(connect {:uri (str "http://localhost:" (:port @test-env))}) {}))
+         "xtdb.mem_kv.MemKv"))))
 

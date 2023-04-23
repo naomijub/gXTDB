@@ -1,5 +1,5 @@
 (ns gxtdb.utils
-    (:require [clojure.instant :refer [read-instant-date]]
+  (:require [clojure.instant :refer [read-instant-date]]
             [clojure.string :as str])
   (:import java.text.SimpleDateFormat))
 

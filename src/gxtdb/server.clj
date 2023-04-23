@@ -6,7 +6,7 @@
 
 ;; This is an adapted service map, that can be started and stopped
 ;; From the REPL you can call server/start and server/stop on this service
-(defn runnable-service [xtdb-node] (-> xtdb-node service/service server/create-server ))
+(defn runnable-service [xtdb-node] (-> xtdb-node service/service server/create-server))
 
 (defn -run-test
   "The entry-point for 'lein run-dev'"
