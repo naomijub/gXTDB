@@ -5,7 +5,9 @@
             :url "https://www.mit.edu/~amini/LICENSE.md"
             :year 2023
             :key "mit"}
-  :plugins [[lein-cljfmt "0.9.2"]]
+  :plugins [[lein-cljfmt "0.9.2"]
+            [lein-kibit "0.1.8"]
+            [jonase/eastwood "1.4.0"]]
   :dependencies [[org.clojure/clojure "1.10.3"]
                  [com.xtdb/xtdb-core "1.22.1"]
                  [io.pedestal/pedestal.service "0.5.9"]

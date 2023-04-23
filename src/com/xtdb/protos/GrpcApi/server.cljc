@@ -4,8 +4,7 @@
 ;;; GRPC com.xtdb.protos.GrpcApi Service Implementation
 ;;;----------------------------------------------------------------------------------
 (ns com.xtdb.protos.GrpcApi.server
-  (:require [com.xtdb.protos :refer :all]
-))
+  (:require [com.xtdb.protos :refer :all]))
 
 ;-----------------------------------------------------------------------------
 ; GRPC GrpcApi

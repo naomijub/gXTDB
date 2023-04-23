@@ -36,20 +36,18 @@
 
 (defn convert-OptionString-value [origkeyval]
   (cond
-     (get-in origkeyval [:value :none]) (update-in origkeyval [:value :none] new-Empty)
-     (get-in origkeyval [:value :some]) origkeyval
-     :default origkeyval))
+    (get-in origkeyval [:value :none]) (update-in origkeyval [:value :none] new-Empty)
+    (get-in origkeyval [:value :some]) origkeyval
+    :default origkeyval))
 
 (defn write-OptionString-value [value os]
   (let [field (first value)
         k (when-not (nil? field) (key field))
         v (when-not (nil? field) (val field))]
-     (case k
-         :none (serdes.core/write-embedded 1 v os)
-         :some (serdes.core/write-String 2  {:optimize false} v os)
-         nil)))
-
-
+    (case k
+      :none (serdes.core/write-embedded 1 v os)
+      :some (serdes.core/write-String 2  {:optimize false} v os)
+      nil)))
 
 ;;----------------------------------------------------------------------------------
 ;;----------------------------------------------------------------------------------
@@ -62,8 +60,7 @@
 ;-----------------------------------------------------------------------------
 (defrecord Empty-record []
   pb/Writer
-  (serialize [this os]
-)
+  (serialize [this os])
   pb/TypeReflection
   (gettype [this]
     "com.xtdb.protos.Empty"))
@@ -75,11 +72,11 @@
   "CodedInputStream to Empty"
   [is]
   (->> (tag-map Empty-defaults
-         (fn [tag index]
-             (case index
-               [index (serdes.core/cis->undefined tag is)]))
-         is)
-        (map->Empty-record)))
+                (fn [tag index]
+                  (case index
+                    [index (serdes.core/cis->undefined tag is)]))
+                is)
+       (map->Empty-record)))
 
 (defn ecis->Empty
   "Embedded CodedInputStream to Empty"
@@ -120,14 +117,14 @@
   "CodedInputStream to OptionString"
   [is]
   (->> (tag-map OptionString-defaults
-         (fn [tag index]
-             (case index
-               1 [:value {:none (ecis->Empty is)}]
-               2 [:value {:some (serdes.core/cis->String is)}]
+                (fn [tag index]
+                  (case index
+                    1 [:value {:none (ecis->Empty is)}]
+                    2 [:value {:some (serdes.core/cis->String is)}]
 
-               [index (serdes.core/cis->undefined tag is)]))
-         is)
-        (map->OptionString-record)))
+                    [index (serdes.core/cis->undefined tag is)]))
+                is)
+       (map->OptionString-record)))
 
 (defn ecis->OptionString
   "Embedded CodedInputStream to OptionString"
@@ -174,27 +171,26 @@
 (s/def :com.xtdb.protos.StatusResponse/estimate-num-keys int?)
 (s/def :com.xtdb.protos.StatusResponse/size int?)
 
-
-(s/def ::StatusResponse-spec (s/keys :opt-un [:com.xtdb.protos.StatusResponse/version :com.xtdb.protos.StatusResponse/index-version :com.xtdb.protos.StatusResponse/kv-store :com.xtdb.protos.StatusResponse/estimate-num-keys :com.xtdb.protos.StatusResponse/size ]))
-(def StatusResponse-defaults {:version "" :index-version 0 :kv-store "" :estimate-num-keys 0 :size 0 })
+(s/def ::StatusResponse-spec (s/keys :opt-un [:com.xtdb.protos.StatusResponse/version :com.xtdb.protos.StatusResponse/index-version :com.xtdb.protos.StatusResponse/kv-store :com.xtdb.protos.StatusResponse/estimate-num-keys :com.xtdb.protos.StatusResponse/size]))
+(def StatusResponse-defaults {:version "" :index-version 0 :kv-store "" :estimate-num-keys 0 :size 0})
 
 (defn cis->StatusResponse
   "CodedInputStream to StatusResponse"
   [is]
   (->> (tag-map StatusResponse-defaults
-         (fn [tag index]
-             (case index
-               1 [:version (serdes.core/cis->String is)]
-               2 [:index-version (serdes.core/cis->Int32 is)]
-               3 [:kv-store (serdes.core/cis->String is)]
-               4 [:estimate-num-keys (serdes.core/cis->Int32 is)]
-               5 [:size (serdes.core/cis->Int64 is)]
-               6 [:revision (ecis->OptionString is)]
-               7 [:consumer-state (ecis->OptionString is)]
+                (fn [tag index]
+                  (case index
+                    1 [:version (serdes.core/cis->String is)]
+                    2 [:index-version (serdes.core/cis->Int32 is)]
+                    3 [:kv-store (serdes.core/cis->String is)]
+                    4 [:estimate-num-keys (serdes.core/cis->Int32 is)]
+                    5 [:size (serdes.core/cis->Int64 is)]
+                    6 [:revision (ecis->OptionString is)]
+                    7 [:consumer-state (ecis->OptionString is)]
 
-               [index (serdes.core/cis->undefined tag is)]))
-         is)
-        (map->StatusResponse-record)))
+                    [index (serdes.core/cis->undefined tag is)]))
+                is)
+       (map->StatusResponse-record)))
 
 (defn ecis->StatusResponse
   "Embedded CodedInputStream to StatusResponse"

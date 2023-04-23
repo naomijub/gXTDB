@@ -19,13 +19,13 @@
 (defn Status
   ([client params] (Status client {} params))
   ([client metadata params]
-  (let [input (async/chan 1)
-        output (async/chan 1)
-        desc {:service "com.xtdb.protos.GrpcApi"
-              :method  "Status"
-              :input   {:f com.xtdb.protos/new-Empty :ch input}
-              :output  {:f com.xtdb.protos/pb->StatusResponse :ch output}
-              :metadata metadata}]
-    (-> (send-unary-params input params)
-        (p/then (fn [_] (invoke-unary client desc output)))))))
+   (let [input (async/chan 1)
+         output (async/chan 1)
+         desc {:service "com.xtdb.protos.GrpcApi"
+               :method  "Status"
+               :input   {:f com.xtdb.protos/new-Empty :ch input}
+               :output  {:f com.xtdb.protos/pb->StatusResponse :ch output}
+               :metadata metadata}]
+     (-> (send-unary-params input params)
+         (p/then (fn [_] (invoke-unary client desc output)))))))
 
