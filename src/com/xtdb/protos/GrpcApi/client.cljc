@@ -30,13 +30,13 @@
                :metadata metadata}]
      (p/then (send-unary-params input params) (fn [_] (invoke-unary client desc output))))))
 
-(defn submit_tx
-  ([client params] (submit_tx client {} params))
+(defn SubmitTx
+  ([client params] (SubmitTx client {} params))
   ([client metadata params]
    (let [input (async/chan 1)
          output (async/chan 1)
          desc {:service "com.xtdb.protos.GrpcApi"
-               :method  "submit_tx"
+               :method  "SubmitTx"
                :input   {:f com.xtdb.protos/new-SubmitRequest :ch input}
                :output  {:f com.xtdb.protos/pb->SubmitResponse :ch output}
                :metadata metadata}]

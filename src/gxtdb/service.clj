@@ -43,6 +43,9 @@
 
 (deftype GrpcAPI [xtdb-node]
   api/Service
+  (SubmitTx [_this _request]
+    {:status 200
+     :body {:tx-time "time" :tx-id 3}})
   (Status
     [_this _request]
     (let [status (xt/status xtdb-node)]
