@@ -13,7 +13,8 @@ message Transaction {
 }
 
 message Put {
-    google.protobuf.Value document = 1;
+    string xt_id = 1;
+    google.protobuf.Value document = 2;
 }
 
 message Delete {

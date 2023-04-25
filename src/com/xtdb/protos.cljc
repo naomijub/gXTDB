@@ -233,21 +233,24 @@
 ;-----------------------------------------------------------------------------
 ; Put
 ;-----------------------------------------------------------------------------
-(defrecord Put-record [document]
+(defrecord Put-record [xt-id document]
   pb/Writer
   (serialize [this os]
-    (serdes.core/write-embedded 1 (:document this) os))
+    (serdes.core/write-String 1  {:optimize true} (:xt-id this) os)
+    (serdes.core/write-embedded 2 (:document this) os))
   pb/TypeReflection
   (gettype [this]
     "com.xtdb.protos.Put"))
 
-(s/def ::Put-spec (s/keys :opt-un []))
-(def Put-defaults {})
+(s/def :com.xtdb.protos.Put/xt-id string?)
+
+(s/def ::Put-spec (s/keys :opt-un [:com.xtdb.protos.Put/xt-id]))
+(def Put-defaults {:xt-id ""})
 
 (defn cis->Put
   "CodedInputStream to Put"
   [is]
-  (map->Put-record (tag-map Put-defaults (fn [tag index] (case index 1 [:document (com.google.protobuf/ecis->Value is)] [index (serdes.core/cis->undefined tag is)])) is)))
+  (map->Put-record (tag-map Put-defaults (fn [tag index] (case index 1 [:xt-id (serdes.core/cis->String is)] 2 [:document (com.google.protobuf/ecis->Value is)] [index (serdes.core/cis->undefined tag is)])) is)))
 
 (defn ecis->Put
   "Embedded CodedInputStream to Put"
