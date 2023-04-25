@@ -9,6 +9,8 @@
             [protojure.protobuf.serdes.complex :as serdes.complex]
             [protojure.protobuf.serdes.utils :refer [tag-map]]
             [protojure.protobuf.serdes.stream :as serdes.stream]
+            [com.xtdb.protos :as com.xtdb.protos]
+            [com.google.protobuf :as com.google.protobuf]
             [clojure.set :as set]
             [clojure.spec.alpha :as s]))
 
@@ -21,12 +23,53 @@
 (declare cis->Empty)
 (declare ecis->Empty)
 (declare new-Empty)
-(declare cis->OptionString)
-(declare ecis->OptionString)
-(declare new-OptionString)
 (declare cis->StatusResponse)
 (declare ecis->StatusResponse)
 (declare new-StatusResponse)
+(declare cis->Evict)
+(declare ecis->Evict)
+(declare new-Evict)
+(declare cis->Put)
+(declare ecis->Put)
+(declare new-Put)
+(declare cis->Delete)
+(declare ecis->Delete)
+(declare new-Delete)
+(declare cis->SubmitRequest)
+(declare ecis->SubmitRequest)
+(declare new-SubmitRequest)
+(declare cis->SubmitResponse)
+(declare ecis->SubmitResponse)
+(declare new-SubmitResponse)
+(declare cis->Transaction)
+(declare ecis->Transaction)
+(declare new-Transaction)
+(declare cis->OptionString)
+(declare ecis->OptionString)
+(declare new-OptionString)
+
+;;----------------------------------------------------------------------------------
+;;----------------------------------------------------------------------------------
+;; Transaction-transaction-type's oneof Implementations
+;;----------------------------------------------------------------------------------
+;;----------------------------------------------------------------------------------
+
+(defn convert-Transaction-transaction-type [origkeyval]
+  (cond
+    (get-in origkeyval [:transaction-type :put]) (update-in origkeyval [:transaction-type :put] new-Put)
+    (get-in origkeyval [:transaction-type :delete]) (update-in origkeyval [:transaction-type :delete] new-Delete)
+    (get-in origkeyval [:transaction-type :evict]) (update-in origkeyval [:transaction-type :evict] new-Evict)
+    :default origkeyval))
+
+(defn write-Transaction-transaction-type [transaction-type os]
+  (let [field (first transaction-type)
+        k (when-not (nil? field) (key field))
+        v (when-not (nil? field) (val field))]
+    (case k
+      :put (serdes.core/write-embedded 1 v os)
+      :delete (serdes.core/write-embedded 2 v os)
+      :evict (serdes.core/write-embedded 3 v os)
+      nil)))
 
 ;;----------------------------------------------------------------------------------
 ;;----------------------------------------------------------------------------------
@@ -94,47 +137,6 @@
 (def ^:protojure.protobuf.any/record Empty-meta {:type "com.xtdb.protos.Empty" :decoder pb->Empty})
 
 ;-----------------------------------------------------------------------------
-; OptionString
-;-----------------------------------------------------------------------------
-(defrecord OptionString-record [value]
-  pb/Writer
-  (serialize [this os]
-    (write-OptionString-value  (:value this) os))
-  pb/TypeReflection
-  (gettype [this]
-    "com.xtdb.protos.OptionString"))
-
-(s/def ::OptionString-spec (s/keys :opt-un []))
-(def OptionString-defaults {})
-
-(defn cis->OptionString
-  "CodedInputStream to OptionString"
-  [is]
-  (map->OptionString-record (tag-map OptionString-defaults (fn [tag index] (case index 1 [:value {:none (ecis->Empty is)}] 2 [:value {:some (serdes.core/cis->String is)}] [index (serdes.core/cis->undefined tag is)])) is)))
-
-(defn ecis->OptionString
-  "Embedded CodedInputStream to OptionString"
-  [is]
-  (serdes.core/cis->embedded cis->OptionString is))
-
-(defn new-OptionString
-  "Creates a new instance from a map, similar to map->OptionString except that
-  it properly accounts for nested messages, when applicable.
-  "
-  [init]
-  {:pre [(if (s/valid? ::OptionString-spec init) true (throw (ex-info "Invalid input" (s/explain-data ::OptionString-spec init))))]}
-  (-> (merge OptionString-defaults init)
-      (convert-OptionString-value)
-      (map->OptionString-record)))
-
-(defn pb->OptionString
-  "Protobuf to OptionString"
-  [input]
-  (cis->OptionString (serdes.stream/new-cis input)))
-
-(def ^:protojure.protobuf.any/record OptionString-meta {:type "com.xtdb.protos.OptionString" :decoder pb->OptionString})
-
-;-----------------------------------------------------------------------------
 ; StatusResponse
 ;-----------------------------------------------------------------------------
 (defrecord StatusResponse-record [version index-version kv-store estimate-num-keys size revision consumer-state]
@@ -187,4 +189,290 @@
   (cis->StatusResponse (serdes.stream/new-cis input)))
 
 (def ^:protojure.protobuf.any/record StatusResponse-meta {:type "com.xtdb.protos.StatusResponse" :decoder pb->StatusResponse})
+
+;-----------------------------------------------------------------------------
+; Evict
+;-----------------------------------------------------------------------------
+(defrecord Evict-record [document-id]
+  pb/Writer
+  (serialize [this os]
+    (serdes.core/write-String 1  {:optimize true} (:document-id this) os))
+  pb/TypeReflection
+  (gettype [this]
+    "com.xtdb.protos.Evict"))
+
+(s/def :com.xtdb.protos.Evict/document-id string?)
+(s/def ::Evict-spec (s/keys :opt-un [:com.xtdb.protos.Evict/document-id]))
+(def Evict-defaults {:document-id ""})
+
+(defn cis->Evict
+  "CodedInputStream to Evict"
+  [is]
+  (map->Evict-record (tag-map Evict-defaults (fn [tag index] (case index 1 [:document-id (serdes.core/cis->String is)] [index (serdes.core/cis->undefined tag is)])) is)))
+
+(defn ecis->Evict
+  "Embedded CodedInputStream to Evict"
+  [is]
+  (serdes.core/cis->embedded cis->Evict is))
+
+(defn new-Evict
+  "Creates a new instance from a map, similar to map->Evict except that
+  it properly accounts for nested messages, when applicable.
+  "
+  [init]
+  {:pre [(if (s/valid? ::Evict-spec init) true (throw (ex-info "Invalid input" (s/explain-data ::Evict-spec init))))]}
+  (map->Evict-record (merge Evict-defaults init)))
+
+(defn pb->Evict
+  "Protobuf to Evict"
+  [input]
+  (cis->Evict (serdes.stream/new-cis input)))
+
+(def ^:protojure.protobuf.any/record Evict-meta {:type "com.xtdb.protos.Evict" :decoder pb->Evict})
+
+;-----------------------------------------------------------------------------
+; Put
+;-----------------------------------------------------------------------------
+(defrecord Put-record [document]
+  pb/Writer
+  (serialize [this os]
+    (serdes.core/write-embedded 1 (:document this) os))
+  pb/TypeReflection
+  (gettype [this]
+    "com.xtdb.protos.Put"))
+
+(s/def ::Put-spec (s/keys :opt-un []))
+(def Put-defaults {})
+
+(defn cis->Put
+  "CodedInputStream to Put"
+  [is]
+  (map->Put-record (tag-map Put-defaults (fn [tag index] (case index 1 [:document (com.google.protobuf/ecis->Value is)] [index (serdes.core/cis->undefined tag is)])) is)))
+
+(defn ecis->Put
+  "Embedded CodedInputStream to Put"
+  [is]
+  (serdes.core/cis->embedded cis->Put is))
+
+(defn new-Put
+  "Creates a new instance from a map, similar to map->Put except that
+  it properly accounts for nested messages, when applicable.
+  "
+  [init]
+  {:pre [(if (s/valid? ::Put-spec init) true (throw (ex-info "Invalid input" (s/explain-data ::Put-spec init))))]}
+  (-> (merge Put-defaults init)
+      (cond-> (some? (get init :document)) (update :document com.google.protobuf/new-Value))
+      (map->Put-record)))
+
+(defn pb->Put
+  "Protobuf to Put"
+  [input]
+  (cis->Put (serdes.stream/new-cis input)))
+
+(def ^:protojure.protobuf.any/record Put-meta {:type "com.xtdb.protos.Put" :decoder pb->Put})
+
+;-----------------------------------------------------------------------------
+; Delete
+;-----------------------------------------------------------------------------
+(defrecord Delete-record [document-id]
+  pb/Writer
+  (serialize [this os]
+    (serdes.core/write-String 1  {:optimize true} (:document-id this) os))
+  pb/TypeReflection
+  (gettype [this]
+    "com.xtdb.protos.Delete"))
+
+(s/def :com.xtdb.protos.Delete/document-id string?)
+(s/def ::Delete-spec (s/keys :opt-un [:com.xtdb.protos.Delete/document-id]))
+(def Delete-defaults {:document-id ""})
+
+(defn cis->Delete
+  "CodedInputStream to Delete"
+  [is]
+  (map->Delete-record (tag-map Delete-defaults (fn [tag index] (case index 1 [:document-id (serdes.core/cis->String is)] [index (serdes.core/cis->undefined tag is)])) is)))
+
+(defn ecis->Delete
+  "Embedded CodedInputStream to Delete"
+  [is]
+  (serdes.core/cis->embedded cis->Delete is))
+
+(defn new-Delete
+  "Creates a new instance from a map, similar to map->Delete except that
+  it properly accounts for nested messages, when applicable.
+  "
+  [init]
+  {:pre [(if (s/valid? ::Delete-spec init) true (throw (ex-info "Invalid input" (s/explain-data ::Delete-spec init))))]}
+  (map->Delete-record (merge Delete-defaults init)))
+
+(defn pb->Delete
+  "Protobuf to Delete"
+  [input]
+  (cis->Delete (serdes.stream/new-cis input)))
+
+(def ^:protojure.protobuf.any/record Delete-meta {:type "com.xtdb.protos.Delete" :decoder pb->Delete})
+
+;-----------------------------------------------------------------------------
+; SubmitRequest
+;-----------------------------------------------------------------------------
+(defrecord SubmitRequest-record [tx-ops]
+  pb/Writer
+  (serialize [this os]
+    (serdes.complex/write-repeated serdes.core/write-embedded 1 (:tx-ops this) os))
+  pb/TypeReflection
+  (gettype [this]
+    "com.xtdb.protos.SubmitRequest"))
+
+(s/def ::SubmitRequest-spec (s/keys :opt-un []))
+(def SubmitRequest-defaults {:tx-ops []})
+
+(defn cis->SubmitRequest
+  "CodedInputStream to SubmitRequest"
+  [is]
+  (map->SubmitRequest-record (tag-map SubmitRequest-defaults (fn [tag index] (case index 1 [:tx-ops (serdes.complex/cis->repeated ecis->Transaction is)] [index (serdes.core/cis->undefined tag is)])) is)))
+
+(defn ecis->SubmitRequest
+  "Embedded CodedInputStream to SubmitRequest"
+  [is]
+  (serdes.core/cis->embedded cis->SubmitRequest is))
+
+(defn new-SubmitRequest
+  "Creates a new instance from a map, similar to map->SubmitRequest except that
+  it properly accounts for nested messages, when applicable.
+  "
+  [init]
+  {:pre [(if (s/valid? ::SubmitRequest-spec init) true (throw (ex-info "Invalid input" (s/explain-data ::SubmitRequest-spec init))))]}
+  (-> (merge SubmitRequest-defaults init)
+      (cond-> (some? (get init :tx-ops)) (update :tx-ops #(map new-Transaction %)))
+      (map->SubmitRequest-record)))
+
+(defn pb->SubmitRequest
+  "Protobuf to SubmitRequest"
+  [input]
+  (cis->SubmitRequest (serdes.stream/new-cis input)))
+
+(def ^:protojure.protobuf.any/record SubmitRequest-meta {:type "com.xtdb.protos.SubmitRequest" :decoder pb->SubmitRequest})
+
+;-----------------------------------------------------------------------------
+; SubmitResponse
+;-----------------------------------------------------------------------------
+(defrecord SubmitResponse-record [tx-time tx-id]
+  pb/Writer
+  (serialize [this os]
+    (serdes.core/write-String 1  {:optimize true} (:tx-time this) os)
+    (serdes.core/write-Int64 2  {:optimize true} (:tx-id this) os))
+  pb/TypeReflection
+  (gettype [this]
+    "com.xtdb.protos.SubmitResponse"))
+
+(s/def :com.xtdb.protos.SubmitResponse/tx-time string?)
+(s/def :com.xtdb.protos.SubmitResponse/tx-id int?)
+(s/def ::SubmitResponse-spec (s/keys :opt-un [:com.xtdb.protos.SubmitResponse/tx-time :com.xtdb.protos.SubmitResponse/tx-id]))
+(def SubmitResponse-defaults {:tx-time "" :tx-id 0})
+
+(defn cis->SubmitResponse
+  "CodedInputStream to SubmitResponse"
+  [is]
+  (map->SubmitResponse-record (tag-map SubmitResponse-defaults (fn [tag index] (case index 1 [:tx-time (serdes.core/cis->String is)] 2 [:tx-id (serdes.core/cis->Int64 is)] [index (serdes.core/cis->undefined tag is)])) is)))
+
+(defn ecis->SubmitResponse
+  "Embedded CodedInputStream to SubmitResponse"
+  [is]
+  (serdes.core/cis->embedded cis->SubmitResponse is))
+
+(defn new-SubmitResponse
+  "Creates a new instance from a map, similar to map->SubmitResponse except that
+  it properly accounts for nested messages, when applicable.
+  "
+  [init]
+  {:pre [(if (s/valid? ::SubmitResponse-spec init) true (throw (ex-info "Invalid input" (s/explain-data ::SubmitResponse-spec init))))]}
+  (map->SubmitResponse-record (merge SubmitResponse-defaults init)))
+
+(defn pb->SubmitResponse
+  "Protobuf to SubmitResponse"
+  [input]
+  (cis->SubmitResponse (serdes.stream/new-cis input)))
+
+(def ^:protojure.protobuf.any/record SubmitResponse-meta {:type "com.xtdb.protos.SubmitResponse" :decoder pb->SubmitResponse})
+
+;-----------------------------------------------------------------------------
+; Transaction
+;-----------------------------------------------------------------------------
+(defrecord Transaction-record [transaction-type]
+  pb/Writer
+  (serialize [this os]
+    (write-Transaction-transaction-type  (:transaction-type this) os))
+  pb/TypeReflection
+  (gettype [this]
+    "com.xtdb.protos.Transaction"))
+
+(s/def ::Transaction-spec (s/keys :opt-un []))
+(def Transaction-defaults {})
+
+(defn cis->Transaction
+  "CodedInputStream to Transaction"
+  [is]
+  (map->Transaction-record (tag-map Transaction-defaults (fn [tag index] (case index 1 [:transaction-type {:put (ecis->Put is)}] 2 [:transaction-type {:delete (ecis->Delete is)}] 3 [:transaction-type {:evict (ecis->Evict is)}] [index (serdes.core/cis->undefined tag is)])) is)))
+
+(defn ecis->Transaction
+  "Embedded CodedInputStream to Transaction"
+  [is]
+  (serdes.core/cis->embedded cis->Transaction is))
+
+(defn new-Transaction
+  "Creates a new instance from a map, similar to map->Transaction except that
+  it properly accounts for nested messages, when applicable.
+  "
+  [init]
+  {:pre [(if (s/valid? ::Transaction-spec init) true (throw (ex-info "Invalid input" (s/explain-data ::Transaction-spec init))))]}
+  (-> (merge Transaction-defaults init)
+      (convert-Transaction-transaction-type)
+      (map->Transaction-record)))
+
+(defn pb->Transaction
+  "Protobuf to Transaction"
+  [input]
+  (cis->Transaction (serdes.stream/new-cis input)))
+
+(def ^:protojure.protobuf.any/record Transaction-meta {:type "com.xtdb.protos.Transaction" :decoder pb->Transaction})
+
+;-----------------------------------------------------------------------------
+; OptionString
+;-----------------------------------------------------------------------------
+(defrecord OptionString-record [value]
+  pb/Writer
+  (serialize [this os]
+    (write-OptionString-value  (:value this) os))
+  pb/TypeReflection
+  (gettype [this]
+    "com.xtdb.protos.OptionString"))
+
+(s/def ::OptionString-spec (s/keys :opt-un []))
+(def OptionString-defaults {})
+
+(defn cis->OptionString
+  "CodedInputStream to OptionString"
+  [is]
+  (map->OptionString-record (tag-map OptionString-defaults (fn [tag index] (case index 1 [:value {:none (ecis->Empty is)}] 2 [:value {:some (serdes.core/cis->String is)}] [index (serdes.core/cis->undefined tag is)])) is)))
+
+(defn ecis->OptionString
+  "Embedded CodedInputStream to OptionString"
+  [is]
+  (serdes.core/cis->embedded cis->OptionString is))
+
+(defn new-OptionString
+  "Creates a new instance from a map, similar to map->OptionString except that
+  it properly accounts for nested messages, when applicable.
+  "
+  [init]
+  {:pre [(if (s/valid? ::OptionString-spec init) true (throw (ex-info "Invalid input" (s/explain-data ::OptionString-spec init))))]}
+  (-> (merge OptionString-defaults init)
+      (convert-OptionString-value)
+      (map->OptionString-record)))
+
+(defn pb->OptionString
+  "Protobuf to OptionString"
+  [input]
+  (cis->OptionString (serdes.stream/new-cis input)))
+
+(def ^:protojure.protobuf.any/record OptionString-meta {:type "com.xtdb.protos.OptionString" :decoder pb->OptionString})
 

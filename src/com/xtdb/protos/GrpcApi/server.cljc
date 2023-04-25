@@ -4,19 +4,26 @@
 ;;; GRPC com.xtdb.protos.GrpcApi Service Implementation
 ;;;----------------------------------------------------------------------------------
 (ns com.xtdb.protos.GrpcApi.server
-  (:require [com.xtdb.protos :refer :all]))
+  (:require [com.xtdb.protos :refer :all]
+            [com.xtdb.protos :as com.xtdb.protos]
+            [com.google.protobuf :as com.google.protobuf]))
 
 ;-----------------------------------------------------------------------------
 ; GRPC GrpcApi
 ;-----------------------------------------------------------------------------
 (defprotocol Service
-  (Status [this param]))
+  (Status [this param])
+  (submit_tx [this param]))
 
 (def GrpcApi-service-name "com.xtdb.protos.GrpcApi")
 
 (defn- Status-dispatch
   [ctx request]
   (Status ctx request))
+(defn- submit_tx-dispatch
+  [ctx request]
+  (submit_tx ctx request))
 
 (def ^:const rpc-metadata
-  [{:pkg "com.xtdb.protos" :service "GrpcApi" :method "Status" :method-fn Status-dispatch :server-streaming false :client-streaming false :input pb->Empty :output new-StatusResponse}])
+  [{:pkg "com.xtdb.protos" :service "GrpcApi" :method "Status" :method-fn Status-dispatch :server-streaming false :client-streaming false :input pb->Empty :output new-StatusResponse}
+   {:pkg "com.xtdb.protos" :service "GrpcApi" :method "submit_tx" :method-fn submit_tx-dispatch :server-streaming false :client-streaming false :input pb->SubmitRequest :output new-SubmitResponse}])

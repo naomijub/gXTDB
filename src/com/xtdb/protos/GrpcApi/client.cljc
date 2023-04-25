@@ -5,6 +5,8 @@
 ;;;----------------------------------------------------------------------------------
 (ns com.xtdb.protos.GrpcApi.client
   (:require [com.xtdb.protos :refer :all]
+            [com.xtdb.protos :as com.xtdb.protos]
+            [com.google.protobuf :as com.google.protobuf]
             [clojure.core.async :as async]
             [protojure.grpc.client.utils :refer [send-unary-params invoke-unary]]
             [promesa.core :as p]
@@ -25,6 +27,18 @@
                :method  "Status"
                :input   {:f com.xtdb.protos/new-Empty :ch input}
                :output  {:f com.xtdb.protos/pb->StatusResponse :ch output}
+               :metadata metadata}]
+     (p/then (send-unary-params input params) (fn [_] (invoke-unary client desc output))))))
+
+(defn submit_tx
+  ([client params] (submit_tx client {} params))
+  ([client metadata params]
+   (let [input (async/chan 1)
+         output (async/chan 1)
+         desc {:service "com.xtdb.protos.GrpcApi"
+               :method  "submit_tx"
+               :input   {:f com.xtdb.protos/new-SubmitRequest :ch input}
+               :output  {:f com.xtdb.protos/pb->SubmitResponse :ch output}
                :metadata metadata}]
      (p/then (send-unary-params input params) (fn [_] (invoke-unary client desc output))))))
 

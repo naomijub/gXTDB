@@ -1,6 +1,7 @@
 syntax = "proto3";
 
 package com.xtdb.protos;
+import "transactions.proto";
 
 message Empty { }
 
@@ -23,4 +24,6 @@ message StatusResponse {
 
 service GrpcApi {
   rpc Status (Empty) returns (StatusResponse);
+  rpc submit_tx (com.xtdb.protos.SubmitRequest) returns (com.xtdb.protos.SubmitResponse);
+
 }
