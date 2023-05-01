@@ -1,8 +1,8 @@
-use gxtdb_rs::{client, status};
+use gxtdb_rs::Client;
 
 #[tokio::main]
 async fn main() {
-    let mut client = client("http://localhost", 8080).await.unwrap();
-    let status = status(&mut client).await.unwrap();
+    let mut client = Client::new("http://localhost", 8080).await.unwrap();
+    let status = client.status().await.unwrap();
     println!("{:?}", status)
 }

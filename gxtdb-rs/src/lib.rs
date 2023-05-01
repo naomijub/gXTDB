@@ -7,24 +7,27 @@ use tonic::transport::Channel;
 
 impl From<api::OptionString> for Option<String> {
     fn from(value: api::OptionString) -> Self {
-        value.value.map_or(None, |val| match val {
+        value.value.and_then(|val| match val {
             api::option_string::Value::None(_) => None,
             api::option_string::Value::Some(s) => Some(s),
         })
     }
 }
 
-pub async fn client(
-    host: &str,
-    port: u16,
-) -> Result<GrpcApiClient<Channel>, tonic::transport::Error> {
-    let url = format!("{host}:{port}");
-    GrpcApiClient::connect(url).await
+pub struct Client {
+    client: GrpcApiClient<Channel>,
 }
 
-pub async fn status(
-    client: &mut GrpcApiClient<Channel>,
-) -> Result<tonic::Response<api::StatusResponse>, tonic::Status> {
-    let request = tonic::Request::new(Empty {});
-    client.status(request).await
+impl Client {
+    pub async fn new(host: &str, port: u16) -> Result<Self, tonic::transport::Error> {
+        let url = format!("{host}:{port}");
+        Ok(Self {
+            client: GrpcApiClient::connect(url).await?,
+        })
+    }
+
+    pub async fn status(&mut self) -> Result<tonic::Response<api::StatusResponse>, tonic::Status> {
+        let request = tonic::Request::new(Empty {});
+        self.client.status(request).await
+    }
 }
