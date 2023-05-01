@@ -2,11 +2,13 @@
   "txOps": [
     {
       "put": {
+        "xtId": "id1",
         "document": "Via Security"
       }
     },
     {
       "put": {
+        "xtId": "id2",
         "document": "Rustic Plastic Sausages Graphic Interface incubate"
       }
     }

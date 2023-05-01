@@ -5,6 +5,7 @@
             [ring.util.response :as ring-resp]
 
             [gxtdb.adapters.status :as status-adapter]
+            [gxtdb.adapters.tx-log :as tx-log-adapter]
 
             ;; -- XTDB -- 
             [xtdb.api :as xt]
@@ -43,7 +44,8 @@
 
 (deftype GrpcAPI [xtdb-node]
   api/Service
-  (SubmitTx [_this _request]
+  (SubmitTx [_this {{:keys [tx-ops]} :grpc-params}]
+    (let [tx-log (tx-log-adapter/proto->tx-log tx-ops)])
     {:status 200
      :body {:tx-time "time" :tx-id 3}})
   (Status

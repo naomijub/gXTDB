@@ -1,6 +1,7 @@
 syntax = "proto3";
 
 package com.xtdb.protos;
+
 import "transactions.proto";
 
 message Empty { }
