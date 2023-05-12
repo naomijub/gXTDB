@@ -15,6 +15,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+    - name: Install Protoc
+      uses: arduino/setup-protoc@v1
     - name: Install alsa and udev
       run: sudo apt-get update; sudo apt-get install --no-install-recommends libasound2-dev libudev-dev libwayland-dev libxkbcommon-dev
     - name: Build
@@ -25,8 +27,8 @@ jobs:
     permissions: write-all
     steps:
     - uses: actions/checkout@v2
-    - name: Create folder
-      run: mkdir -p assets/voxel_data/
+    - name: Install Protoc
+      uses: arduino/setup-protoc@v1
     - name: Install alsa and udev
       run: sudo apt-get update; sudo apt-get install --no-install-recommends libasound2-dev libudev-dev libwayland-dev libxkbcommon-dev
     - name: tests
@@ -45,6 +47,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - name: Install Protoc
+      uses: arduino/setup-protoc@v1
     - name: Install alsa and udev
       run: sudo apt-get update; sudo apt-get install --no-install-recommends libasound2-dev libudev-dev libwayland-dev libxkbcommon-dev
     - name: install-clippy
