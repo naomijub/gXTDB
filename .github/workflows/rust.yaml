@@ -1,0 +1,57 @@
+name: Rust
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "*" ]
+
+env:
+  cd gxtdb-rs && CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Install Protoc
+      uses: arduino/setup-protoc@v1
+    - name: Install alsa and udev
+      run: sudo apt-get update; sudo apt-get install --no-install-recommends libasound2-dev libudev-dev libwayland-dev libxkbcommon-dev
+    - name: Build
+      run: cd gxtdb-rs && cargo build --all-features --release --verbose
+      
+  test:
+    runs-on: ubuntu-latest
+    permissions: write-all
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install Protoc
+      uses: arduino/setup-protoc@v1
+    - name: Install alsa and udev
+      run: sudo apt-get update; sudo apt-get install --no-install-recommends libasound2-dev libudev-dev libwayland-dev libxkbcommon-dev
+    - name: tests
+      run: cd gxtdb-rs && cargo test --all-features -- --nocapture
+  
+  fmt:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: FMT
+      run: cd gxtdb-rs && cargo fmt -- --check
+
+  clippy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install Protoc
+      uses: arduino/setup-protoc@v1
+    - name: Install alsa and udev
+      run: sudo apt-get update; sudo apt-get install --no-install-recommends libasound2-dev libudev-dev libwayland-dev libxkbcommon-dev
+    - name: install-clippy
+      run: rustup component add clippy
+    - name: clippy
+      run: cd gxtdb-rs && cargo clippy --all-features -- -W clippy::all --deny "warnings"

@@ -12,7 +12,8 @@
                  [com.xtdb/xtdb-core "1.22.1"]
                  [io.pedestal/pedestal.service "0.5.9"]
                  [com.cognitect/anomalies "0.1.12"]
-
+                 [ch.qos.logback/logback-classic "1.2.11"]
+                 [ch.qos.logback/logback-core "1.2.11"]
                  ;; -- PROTOC-GEN-CLOJURE --
                  [io.github.protojure/grpc-server "2.0.1"]
                  [io.github.protojure/google.protobuf "2.0.0"]
@@ -22,6 +23,9 @@
                  [org.slf4j/jcl-over-slf4j "1.7.32"]
                  [org.slf4j/log4j-over-slf4j "1.7.32"]]
   :min-lein-version "2.0.0"
+  :jvm-opts ["-Dlogback.configurationFile=resources/logback.xml"
+             "-Dclojure.spec.compile-asserts=true"
+             "-Dclojure.spec.check-asserts=true"]
   :resource-paths ["config", "resources"]
   :profiles {:dev {:aliases {"run-dev" ["trampoline" "run" "-m" "gxtdb.server/run-dev"]}
                    :dependencies [[io.pedestal/pedestal.service-tools "0.5.9"]
