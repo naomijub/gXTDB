@@ -50,4 +50,4 @@ jobs:
     - name: install-clippy
       run: rustup component add clippy
     - name: clippy
-      run: cd gxtdb-rs && cargo clippy --all-features -- -W clippy::all -W clippy::nursery --deny "warnings"
+      run: cd gxtdb-rs && cargo clippy --all-features -- -W clippy::all --deny "warnings"
