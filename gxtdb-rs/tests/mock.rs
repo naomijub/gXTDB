@@ -12,15 +12,7 @@ impl GrpcApi for ServerMock {
         &self,
         _request: tonic::Request<api::Empty>,
     ) -> Result<tonic::Response<api::StatusResponse>, tonic::Status> {
-        Ok(tonic::Response::new(api::StatusResponse {
-            version: "0".to_string(),
-            index_version: 1,
-            kv_store: "kv".to_string(),
-            estimate_num_keys: 2,
-            size: 2,
-            revision: None,
-            consumer_state: None,
-        }))
+        Ok(tonic::Response::new(api::StatusResponse::default()))
     }
 }
 
