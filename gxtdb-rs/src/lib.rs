@@ -3,7 +3,7 @@ pub mod api {
 }
 
 use api::{grpc_api_client::GrpcApiClient, Empty};
-use tonic::transport::{Channel};
+use tonic::transport::Channel;
 
 impl From<api::OptionString> for Option<String> {
     fn from(value: api::OptionString) -> Self {
@@ -28,7 +28,9 @@ impl Client {
     }
 
     pub fn new_with_channel(channel: Channel) -> Self {
-        Self { client: GrpcApiClient::new(channel) }
+        Self {
+            client: GrpcApiClient::new(channel),
+        }
     }
 
     pub async fn status(&mut self) -> Result<tonic::Response<api::StatusResponse>, tonic::Status> {
