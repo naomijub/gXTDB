@@ -1,2 +1,2 @@
 [workspace]
-members=["gxtdb-rs"]
+members = ["gxtdb-rs"]

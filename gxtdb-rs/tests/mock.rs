@@ -1,4 +1,4 @@
-use gxtdb_rs::api;
+use gxtdb_rs::api::{self};
 use gxtdb_rs::api::grpc_api_server::{GrpcApi, GrpcApiServer};
 use tonic::transport::{Endpoint, Server, Uri};
 use tower::service_fn;
@@ -14,6 +14,8 @@ impl GrpcApi for ServerMock {
     ) -> Result<tonic::Response<api::StatusResponse>, tonic::Status> {
         Ok(tonic::Response::new(api::StatusResponse::default()))
     }
+
+    async fn submit_tx(&self, _request: tonic::Request<api::SubmitRequest>) -> Result<tonic::Response<api::SubmitResponse>, tonic::Status> { todo!() }
 }
 
 pub async fn client() -> gxtdb_rs::Client {

@@ -26,5 +26,4 @@ message StatusResponse {
 service GrpcApi {
   rpc Status (Empty) returns (StatusResponse);
   rpc SubmitTx (com.xtdb.protos.SubmitRequest) returns (com.xtdb.protos.SubmitResponse);
-
 }
