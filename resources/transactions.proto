@@ -1,7 +1,8 @@
 syntax = "proto3";
 
 package com.xtdb.protos;
-import "json.proto";
+import "google/protobuf/struct.proto";
+
 
 message Transaction {
     oneof transaction_type {
@@ -11,17 +12,27 @@ message Transaction {
     }
 }
 
+enum IdType {
+    Uuid = 0;
+    Keyword = 1;
+    String = 2;
+    Int = 3;
+}
+
 message Put {
-    string xt_id = 1;
-    com.xtdb.protos.Value document = 2;
+    IdType id_type = 1;
+    string xt_id = 2;
+    google.protobuf.Struct document = 3;
 }
 
 message Delete {
     string document_id = 1;
+    IdType id_type = 2;
 }
 
 message Evict {
     string document_id = 1;
+    IdType id_type = 2;
 }
 
 message SubmitRequest {

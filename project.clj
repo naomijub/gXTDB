@@ -8,7 +8,7 @@
   :plugins [[lein-cljfmt "0.9.2"]
             [lein-kibit "0.1.8"]
             [jonase/eastwood "1.4.0"]]
-  :dependencies [[org.clojure/clojure "1.10.3"]
+  :dependencies [[org.clojure/clojure "1.11.0"]
                  [com.xtdb/xtdb-core "1.22.1"]
                  [io.pedestal/pedestal.service "0.5.9"]
                  [com.cognitect/anomalies "0.1.12"]

@@ -13,7 +13,8 @@
             ;; -- PROTOC-GEN-CLOJURE --
             [protojure.pedestal.core :as protojure.pedestal]
             [protojure.pedestal.routes :as proutes]
-            [com.xtdb.protos.GrpcApi.server :as api]))
+            [com.xtdb.protos.GrpcApi.server :as api]
+            [gxtdb.adapters.tx-log :as tx-log]))
 
 (defn about-page
   [_request]
@@ -45,18 +46,16 @@
 (deftype GrpcAPI [xtdb-node]
   api/Service
   (SubmitTx [_this {{:keys [tx-ops]} :grpc-params}]
-    (let [tx-log (tx-log-adapter/proto->tx-log tx-ops)])
-    {:status 200
-     :body {:tx-time "time" :tx-id 3}})
+    (let [tx-log (tx-log-adapter/proto->tx-log tx-ops)
+          xt-response (xt/submit-tx xtdb-node tx-log)]
+      {:status 200
+       :body (tx-log-adapter/xtdb->proto xt-response)}))
   (Status
     [_this _request]
     (let [status (xt/status xtdb-node)]
       {:status 200
        :body  (status-adapter/edn->grpc status)})))
 
-;; Defines "/" and "/about" routes with their associated :get handlers.
-;; The interceptors defined after the verb map (e.g., {:get home-page}
-;; apply to / and its children (/about).
 (def common-interceptors [(body-params/body-params) http/html-body])
 
 ;; Tabular routes
@@ -64,19 +63,11 @@
               ["/about" :get (conj common-interceptors `about-page)]})
 
 ;; -- PROTOC-GEN-CLOJURE --
-;; Add the routes produced by Greeter->routes
 (defn grpc-routes [xtdb-node] (reduce conj routes (proutes/->tablesyntax {:rpc-metadata api/rpc-metadata :interceptors common-interceptors :callback-context (GrpcAPI. xtdb-node)})))
 
 (defn service [xtdb-node]
   {:env :prod
    ::http/routes (grpc-routes xtdb-node)
-
-              ;; -- PROTOC-GEN-CLOJURE --
-              ;; We override the chain-provider with one provided by protojure.protobuf
-              ;; and based on the Undertow webserver.  This provides the proper support
-              ;; for HTTP/2 trailers, which GRPCs rely on.  A future version of pedestal
-              ;; may provide this support, in which case we can go back to using
-              ;; chain-providers from pedestal.
    ::http/type protojure.pedestal/config
    ::http/chain-provider protojure.pedestal/provider
 

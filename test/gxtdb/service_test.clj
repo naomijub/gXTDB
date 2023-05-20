@@ -1,3 +1,4 @@
+#_{:clj-kondo/ignore [:refer-all]}
 (ns gxtdb.service-test
   (:require [clojure.test :refer :all]
             [com.xtdb.protos.GrpcApi.client :refer :all]
@@ -6,7 +7,8 @@
             [protojure.grpc.client.providers.http2 :refer [connect]]
             [protojure.pedestal.core :as protojure.pedestal]
             [xtdb.api :as xt]
-            [gxtdb.service :as service]))
+            [gxtdb.service :as service]
+            [gxtdb.utils :as utils]))
 
 (def ^:dynamic *opts* {})
 
@@ -42,3 +44,12 @@
          (:kv-store @(Status @(connect {:uri (str "http://localhost:" (:port @test-env))}) {}))
          "xtdb.mem_kv.MemKv"))))
 
+(deftest submit-tx-test
+  (testing "Submit a put tx to xtdb-node"
+    (let [tx @(SubmitTx @(connect {:uri (str "http://localhost:" (:port @test-env))})
+                        {:tx-ops [{:transaction-type
+                                   {:put {:id-type :keyword, :xt-id "id1", :document {:fields {"key" {:kind {:string-value "value"}}}}}}}]})]
+      (is (inst? (-> tx :tx-time utils/->inst)))
+      (is (>=
+           (:tx-id tx)
+           0)))))

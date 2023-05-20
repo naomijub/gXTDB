@@ -7,7 +7,7 @@ kibit:
 lint: fmt kibit
 
 proto:
-	protoc --clojure_out=grpc-client,grpc-server:src --proto_path=resources resources/service.proto
+	protoc --clojure_out=grpc-client,grpc-server:src --proto_path=resources resources/transactions.proto resources/service.proto
 
 all: proto lint
 
