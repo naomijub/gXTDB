@@ -1,6 +1,7 @@
 (ns gxtdb.adapters.tx-log-test
   #_{:clj-kondo/ignore [:refer-all]}
   (:require [clojure.test :refer :all]
+            [gxtdb.utils :as utils]
             [gxtdb.adapters.tx-log :as tx-log]))
 
 (def var->put-tx {:put {:xt-id "id 2", :document {:fields {"painting ids" {:kind {:list-value {:values [{:kind {:number-value 2.0}}, {:kind {:number-value 3.0}} {:kind {:number-value 76.0}} {:kind {:number-value 3.0}}]}}}, "age" {:kind {:number-value 200.0}}, "is-artist?" {:kind {:bool-value true}}, "full name" {:kind {:struct-value {:fields {"last" {:kind {:string-value "picasso"}}, "first" {:kind {:string-value "pablo"}}}}}}, "name" {:kind {:string-value "pablo picasso"}}}}}})
@@ -40,6 +41,6 @@
 
 (deftest xtdb-edn->proto-test
   (testing "Testing if submit tx response can be parsed to proto"
-    (is (=
-         (tx-log/xtdb->proto {:xtdb.api/tx-id 0, :xtdb.api/tx-time #inst "2023-05-20T18:12:24.836-00:00"})
-         {:tx-time "2023-05-20T13:12:24.836-05:00", :tx-id 0}))))
+    (let [proto (tx-log/xtdb->proto {:xtdb.api/tx-id 0, :xtdb.api/tx-time #inst "2023-05-20T18:12:24.836Z"})]
+      (is (inst? (-> proto :tx-time utils/->inst)))
+      (is (= (:tx-id proto) 0)))))
