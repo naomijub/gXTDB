@@ -1,0 +1,12 @@
+{
+  "details": {
+    "methodFqn": "com.xtdb.protos.GrpcApi.SubmitTx"
+  },
+  "requests": [
+    {
+      "location": "SubmitTx-request.json"
+    }
+  ],
+  "operationType": "unary",
+  "invokerName": "grpc"
+}

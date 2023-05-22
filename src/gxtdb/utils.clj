@@ -3,6 +3,7 @@
             [clojure.string :as str])
   (:import java.text.SimpleDateFormat))
 
+#_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
 (defmacro tokenize [x] `(let [x# ~x] x#))
 
 (defn assoc-some-str
@@ -35,3 +36,23 @@
   (if (str/starts-with? value ":")
     (keyword (subs value 1))
     value))
+
+(defn str->keyword [s]
+  (when-not (or (empty? s) (= s ":")) (-> s (str/replace #" " "-") keyword)))
+
+(defn ->id [id-type id]
+  (case id-type
+    :keyword (str->keyword id)
+    :string id
+    :int (parse-long id)
+    :uuid (let [uuid (parse-uuid id)]
+            (if (uuid? uuid) uuid  id))
+    (str->keyword id)))
+
+#_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
+(defn record->map
+  [record]
+  (let [f #(if (record? %) (record->map %) %)
+        ks (keys record)
+        vs (map f (vals record))]
+    (zipmap ks vs)))

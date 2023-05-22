@@ -1,5 +1,5 @@
-use gxtdb_rs::api;
-use gxtdb_rs::api::grpc_api_server::{GrpcApi, GrpcApiServer};
+use gxtdb_rs::proto_api::grpc_api_server::{GrpcApi, GrpcApiServer};
+use gxtdb_rs::proto_api::{self};
 use tonic::transport::{Endpoint, Server, Uri};
 use tower::service_fn;
 
@@ -10,9 +10,16 @@ pub struct ServerMock;
 impl GrpcApi for ServerMock {
     async fn status(
         &self,
-        _request: tonic::Request<api::Empty>,
-    ) -> Result<tonic::Response<api::StatusResponse>, tonic::Status> {
-        Ok(tonic::Response::new(api::StatusResponse::default()))
+        _request: tonic::Request<proto_api::Empty>,
+    ) -> Result<tonic::Response<proto_api::StatusResponse>, tonic::Status> {
+        Ok(tonic::Response::new(proto_api::StatusResponse::default()))
+    }
+
+    async fn submit_tx(
+        &self,
+        _request: tonic::Request<proto_api::SubmitRequest>,
+    ) -> Result<tonic::Response<proto_api::SubmitResponse>, tonic::Status> {
+        todo!()
     }
 }
 

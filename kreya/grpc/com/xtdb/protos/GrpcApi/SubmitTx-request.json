@@ -1,0 +1,11 @@
+{
+  "txOps": [
+    {
+      "put": {
+        "xtId": "id1",
+        "idType":"Keyword",
+        "document": {"key": "value"}
+      }
+    }
+  ]
+}
