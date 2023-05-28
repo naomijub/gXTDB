@@ -4,16 +4,42 @@ gRPC Plugin for XTDB
 
 ## Usage:
 
+### Clojure:
+
 1. Install [leiningen](https://leiningen.org/)
 2. execute `make all` after making changes to the `*.proto` files in `resources/`
 
-* Execute server: `lein run`
+* Execute server: `lein run` / `make run`
 * Run tests: `lein test`
-* Format code, Check: `lein cljfmt check`, Fix: `lein cljfmt fix`
-* Lint code, Check: `lein kibit`, Fix: `lein kibit --replace`
+* Format code, Check: `lein cljfmt check`, Fix: `lein cljfmt fix` / `make lint`
+* Lint code, Check: `lein kibit`, Fix: `lein kibit --replace` / `make lint`
 
+To execute queries on the server for testing purpose use tools like kreya.app or postman with gRPC support.
 
-# Protojure stuff
+### Rust
+1. Install [Rust](https://rustup.rs/)
+2. In order to build `tonic >= 0.8.0`, you need the `protoc` Protocol Buffers compiler, along with Protocol Buffers resource files.
+
+**Ubuntu**
+```
+sudo apt update && sudo apt upgrade -y
+sudo apt install -y protobuf-compiler libprotobuf-dev
+```
+
+**Alpine Linux**
+```
+sudo apk add protoc protobuf-dev
+```
+
+**macOS**
+Assuming Homebrew is already installed. (If not, see instructions for installing Homebrew on their [website](https://brew.sh/).)
+
+```
+brew install protobuf 
+```
+
+# Protojure stuff [From template]
+
 ## Usage
 This is the output of a `lein new protojure` template run. The output is a set of sample
 files demonstrating the use of the protojure lib + protoc plugin to expose a GRPC service.
