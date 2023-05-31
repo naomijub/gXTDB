@@ -3,43 +3,48 @@ syntax = "proto3";
 package com.xtdb.protos;
 import "google/protobuf/struct.proto";
 
-
 message Transaction {
-    oneof transaction_type {
-        Put put = 1;
-        Delete delete = 2;
-        Evict evict = 3;
-    }
+  oneof transaction_type {
+    Put put = 1;
+    Delete delete = 2;
+    Evict evict = 3;
+    Match match = 4;
+  }
 }
 
 enum IdType {
-    Uuid = 0;
-    Keyword = 1;
-    String = 2;
-    Int = 3;
+  Uuid = 0;
+  Keyword = 1;
+  String = 2;
+  Int = 3;
 }
 
 message Put {
-    IdType id_type = 1;
-    string xt_id = 2;
-    google.protobuf.Struct document = 3;
+  IdType id_type = 1;
+  string xt_id = 2;
+  google.protobuf.Struct document = 3;
 }
 
 message Delete {
-    string document_id = 1;
-    IdType id_type = 2;
+  string document_id = 1;
+  IdType id_type = 2;
 }
 
 message Evict {
-    string document_id = 1;
-    IdType id_type = 2;
+  string document_id = 1;
+  IdType id_type = 2;
 }
 
-message SubmitRequest {
-    repeated Transaction tx_ops = 1;
-} 
+message Match {
+  string document_id = 1;
+  IdType id_type = 2;
+  google.protobuf.Struct document = 3;
+  string valid_time = 4;
+}
+
+message SubmitRequest { repeated Transaction tx_ops = 1; }
 
 message SubmitResponse {
-    string tx_time = 1;
-    int64 tx_id = 2;
+  string tx_time = 1;
+  int64 tx_id = 2;
 }

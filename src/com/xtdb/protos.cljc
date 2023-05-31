@@ -47,6 +47,9 @@
 (declare cis->OptionString)
 (declare ecis->OptionString)
 (declare new-OptionString)
+(declare cis->Match)
+(declare ecis->Match)
+(declare new-Match)
 
 ;;----------------------------------------------------------------------------------
 ;;----------------------------------------------------------------------------------
@@ -90,6 +93,7 @@
     (get-in origkeyval [:transaction-type :put]) (update-in origkeyval [:transaction-type :put] new-Put)
     (get-in origkeyval [:transaction-type :delete]) (update-in origkeyval [:transaction-type :delete] new-Delete)
     (get-in origkeyval [:transaction-type :evict]) (update-in origkeyval [:transaction-type :evict] new-Evict)
+    (get-in origkeyval [:transaction-type :match]) (update-in origkeyval [:transaction-type :match] new-Match)
     :default origkeyval))
 
 (defn write-Transaction-transaction-type [transaction-type os]
@@ -100,6 +104,7 @@
       :put (serdes.core/write-embedded 1 v os)
       :delete (serdes.core/write-embedded 2 v os)
       :evict (serdes.core/write-embedded 3 v os)
+      :match (serdes.core/write-embedded 4 v os)
       nil)))
 
 ;;----------------------------------------------------------------------------------
@@ -451,7 +456,7 @@
 (defn cis->Transaction
   "CodedInputStream to Transaction"
   [is]
-  (map->Transaction-record (tag-map Transaction-defaults (fn [tag index] (case index 1 [:transaction-type {:put (ecis->Put is)}] 2 [:transaction-type {:delete (ecis->Delete is)}] 3 [:transaction-type {:evict (ecis->Evict is)}] [index (serdes.core/cis->undefined tag is)])) is)))
+  (map->Transaction-record (tag-map Transaction-defaults (fn [tag index] (case index 1 [:transaction-type {:put (ecis->Put is)}] 2 [:transaction-type {:delete (ecis->Delete is)}] 3 [:transaction-type {:evict (ecis->Evict is)}] 4 [:transaction-type {:match (ecis->Match is)}] [index (serdes.core/cis->undefined tag is)])) is)))
 
 (defn ecis->Transaction
   "Embedded CodedInputStream to Transaction"
@@ -515,4 +520,52 @@
   (cis->OptionString (serdes.stream/new-cis input)))
 
 (def ^:protojure.protobuf.any/record OptionString-meta {:type "com.xtdb.protos.OptionString" :decoder pb->OptionString})
+
+;-----------------------------------------------------------------------------
+; Match
+;-----------------------------------------------------------------------------
+(defrecord Match-record [document-id id-type document valid-time]
+  pb/Writer
+  (serialize [this os]
+    (serdes.core/write-String 1  {:optimize true} (:document-id this) os)
+    (write-IdType 2  {:optimize true} (:id-type this) os)
+    (serdes.core/write-embedded 3 (:document this) os)
+    (serdes.core/write-String 4  {:optimize true} (:valid-time this) os))
+  pb/TypeReflection
+  (gettype [this]
+    "com.xtdb.protos.Match"))
+
+(s/def :com.xtdb.protos.Match/document-id string?)
+(s/def :com.xtdb.protos.Match/id-type (s/or :keyword keyword? :int int?))
+
+(s/def :com.xtdb.protos.Match/valid-time string?)
+(s/def ::Match-spec (s/keys :opt-un [:com.xtdb.protos.Match/document-id :com.xtdb.protos.Match/id-type :com.xtdb.protos.Match/valid-time]))
+(def Match-defaults {:document-id "" :id-type IdType-default :valid-time ""})
+
+(defn cis->Match
+  "CodedInputStream to Match"
+  [is]
+  (map->Match-record (tag-map Match-defaults (fn [tag index] (case index 1 [:document-id (serdes.core/cis->String is)] 2 [:id-type (cis->IdType is)] 3 [:document (com.google.protobuf/ecis->Struct is)] 4 [:valid-time (serdes.core/cis->String is)] [index (serdes.core/cis->undefined tag is)])) is)))
+
+(defn ecis->Match
+  "Embedded CodedInputStream to Match"
+  [is]
+  (serdes.core/cis->embedded cis->Match is))
+
+(defn new-Match
+  "Creates a new instance from a map, similar to map->Match except that
+  it properly accounts for nested messages, when applicable.
+  "
+  [init]
+  {:pre [(if (s/valid? ::Match-spec init) true (throw (ex-info "Invalid input" (s/explain-data ::Match-spec init))))]}
+  (-> (merge Match-defaults init)
+      (cond-> (some? (get init :document)) (update :document com.google.protobuf/new-Struct))
+      (map->Match-record)))
+
+(defn pb->Match
+  "Protobuf to Match"
+  [input]
+  (cis->Match (serdes.stream/new-cis input)))
+
+(def ^:protojure.protobuf.any/record Match-meta {:type "com.xtdb.protos.Match" :decoder pb->Match})
 

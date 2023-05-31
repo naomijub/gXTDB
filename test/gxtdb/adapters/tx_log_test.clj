@@ -19,13 +19,20 @@
 (def var->evict-tx {:evict {:document-id "f2eed61a-1928-4d75-8620-debfc23eae8d", :id-type :uuid}})
 (def expected-evict-tx [:xtdb.api/evict #uuid "f2eed61a-1928-4d75-8620-debfc23eae8d"])
 
+(def var->match-tx {:match {:document-id "id 3", :document {:fields {"id" {:kind {:number-value 3.0}}}}}})
+(def expected-match-tx [:xtdb.api/match
+                        {:xt/id :id-3,
+                         :id 3.0}])
+
 (def var->tx-ops
   [{:transaction-type
     {:put {:id-type :keyword, :xt-id "id1", :document {:fields {"key" {:kind {:string-value "value"}}}}}}}
    {:transaction-type
     {:evict {:document-id "45", :id-type :int}}}
    {:transaction-type
-    {:delete {:document-id "f2eed61a-1928-4d75-8620-debfc23eae8d", :id-type :uuid}}}])
+    {:delete {:document-id "f2eed61a-1928-4d75-8620-debfc23eae8d", :id-type :uuid}}}
+   {:transaction-type
+    {:match {:id-type :keyword, :document-id "id3", :document {:fields {"key" {:kind {:string-value "value"}}}} :valid-time "2023-05-20T19:12:24.836Z"}}}])
 
 (deftest tx-log-adapters-testing
   (testing "Testing if put transactions parses correctly"
@@ -34,10 +41,15 @@
     (is (= (tx-log/->delete var->delete-tx) expected-delete-tx)))
   (testing "Testing if evict transactions parses correctly"
     (is (= (tx-log/->evict var->evict-tx) expected-evict-tx)))
+  (testing "Testing if match transactions parses correctly"
+    (is (= (tx-log/->match var->match-tx) expected-match-tx)))
   (testing "Testing if proto tx-ops becomes xtdb datalog transaction"
     (let [tx-ops  (tx-log/proto->tx-log var->tx-ops)]
       (is (= tx-ops
-             [[:xtdb.api/put {:xt/id :id1, :key "value"}] [:xtdb.api/evict 45] [:xtdb.api/delete #uuid "f2eed61a-1928-4d75-8620-debfc23eae8d"]])))))
+             [[:xtdb.api/put {:xt/id :id1, :key "value"}]
+              [:xtdb.api/evict 45]
+              [:xtdb.api/delete #uuid "f2eed61a-1928-4d75-8620-debfc23eae8d"]
+              [:xtdb.api/match {:key "value" :xt/id :id3}]])))))
 
 (deftest xtdb-edn->proto-test
   (testing "Testing if submit tx response can be parsed to proto"
