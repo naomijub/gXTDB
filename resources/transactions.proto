@@ -19,6 +19,15 @@ enum IdType {
   Int = 3;
 }
 
+message Empty {}
+
+message OptionDatetime {
+  oneof value {
+    Empty none = 1;
+    string some = 2;
+  }
+}
+
 message Put {
   IdType id_type = 1;
   string xt_id = 2;
@@ -39,7 +48,7 @@ message Match {
   string document_id = 1;
   IdType id_type = 2;
   google.protobuf.Struct document = 3;
-  string valid_time = 4;
+  OptionDatetime valid_time = 4;
 }
 
 message SubmitRequest { repeated Transaction tx_ops = 1; }
