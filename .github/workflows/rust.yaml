@@ -54,4 +54,4 @@ jobs:
     - name: install-clippy
       run: rustup component add clippy
     - name: clippy
-      run: cargo clippy --all-features -- -W clippy::all --deny "warnings"
+      run: cargo clippy --all-features -- -W clippy::all -W clippy::nursery -W clippy::pedantic --deny "warnings"

@@ -1,5 +1,7 @@
 mod api {
     #![allow(clippy::enum_variant_names)]
+    #![allow(clippy::nursery)]
+    #![allow(clippy::pedantic)]
     tonic::include_proto!("mod");
 }
 
