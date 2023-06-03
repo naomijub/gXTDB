@@ -4,8 +4,6 @@ package com.xtdb.protos;
 
 import "transactions.proto";
 
-message Empty { }
-
 message OptionString {
   oneof value {
     Empty none = 1;
@@ -14,16 +12,17 @@ message OptionString {
 }
 
 message StatusResponse {
-    string version = 1;
-    int32 index_version = 2;
-    string kv_store = 3;
-    int32 estimate_num_keys = 4;
-    int64 size = 5;
-    OptionString revision = 6;
-    OptionString consumer_state = 7;
+  string version = 1;
+  int32 index_version = 2;
+  string kv_store = 3;
+  int32 estimate_num_keys = 4;
+  int64 size = 5;
+  OptionString revision = 6;
+  OptionString consumer_state = 7;
 }
 
 service GrpcApi {
-  rpc Status (Empty) returns (StatusResponse);
-  rpc SubmitTx (com.xtdb.protos.SubmitRequest) returns (com.xtdb.protos.SubmitResponse);
+  rpc Status(Empty) returns (StatusResponse);
+  rpc SubmitTx(com.xtdb.protos.SubmitRequest)
+      returns (com.xtdb.protos.SubmitResponse);
 }

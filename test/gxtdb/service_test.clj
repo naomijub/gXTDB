@@ -52,4 +52,14 @@
       (is (inst? (-> tx :tx-time utils/->inst)))
       (is (>=
            (:tx-id tx)
+           0))))
+
+  (testing "Submit a match tx to xtdb-node"
+    (let [tx @(SubmitTx @(connect {:uri (str "http://localhost:" (:port @test-env))})
+                        {:tx-ops [{:transaction-type
+                                   {:match {:id-type :keyword, :valid-time "123" , :document-id "id1", :document {:fields {"key" {:kind {:string-value "value"}}}}}}}]})]
+      (is (inst? (-> tx :tx-time utils/->inst)))
+      (is (>=
+           (:tx-id tx)
            0)))))
+

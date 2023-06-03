@@ -1,7 +1,7 @@
 (ns gxtdb.adapters.tx-log
-  (:require [gxtdb.utils :as utils]
-            [xtdb.api :as xt]
-            [gxtdb.adapters.json :as json]))
+  (:require [gxtdb.adapters.json :as json]
+            [gxtdb.utils :as utils]
+            [xtdb.api :as xt]))
 
 (defn ->evict [transaction]
   (let [transaction (:evict transaction)
@@ -22,6 +22,13 @@
         document (:document transaction)]
     [::xt/put (into {:xt/id (utils/->id id-type id)} (json/value-record->edn {:kind {:struct-value  document}}))]))
 
+(defn ->match [transaction]
+  (let [transaction (:match transaction)
+        id (:document-id transaction)
+        id-type (:id-type transaction)
+        document (:document transaction)]
+    [::xt/match (into {:xt/id (utils/->id id-type id)} (json/value-record->edn {:kind {:struct-value document}}))]))
+
 (defn ->tx-log [ops]
   (let [transaction (:transaction-type ops)
         transaction-type (-> transaction keys first)
@@ -30,6 +37,7 @@
       :put (->put transaction)
       :delete (->delete transaction)
       :evict (->evict transaction)
+      :match (->match transaction)
       :else (throw (str "Transaction type " xt-converted-type " not implemented")))))
 
 (defn proto->tx-log [tx-ops]
