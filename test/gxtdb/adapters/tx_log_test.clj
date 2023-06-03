@@ -1,10 +1,31 @@
 (ns gxtdb.adapters.tx-log-test
-  #_{:clj-kondo/ignore [:refer-all]}
-  (:require [clojure.test :refer :all]
+  (:require [clojure.test :refer [deftest testing is]]
             [gxtdb.utils :as utils]
             [gxtdb.adapters.tx-log :as tx-log]))
 
-(def var->put-tx {:put {:xt-id "id 2", :document {:fields {"painting ids" {:kind {:list-value {:values [{:kind {:number-value 2.0}}, {:kind {:number-value 3.0}} {:kind {:number-value 76.0}} {:kind {:number-value 3.0}}]}}}, "age" {:kind {:number-value 200.0}}, "is-artist?" {:kind {:bool-value true}}, "full name" {:kind {:struct-value {:fields {"last" {:kind {:string-value "picasso"}}, "first" {:kind {:string-value "pablo"}}}}}}, "name" {:kind {:string-value "pablo picasso"}}}}}})
+(def var->put-tx
+  {:put
+   {:xt-id "id 2",
+    :document
+    {:fields
+     {"painting ids"
+      {:kind
+       {:list-value
+        {:values
+         [{:kind {:number-value 2.0}}
+          {:kind {:number-value 3.0}}
+          {:kind {:number-value 76.0}}
+          {:kind {:number-value 3.0}}]}}},
+      "age" {:kind {:number-value 200.0}},
+      "is-artist?" {:kind {:bool-value true}},
+      "full name"
+      {:kind
+       {:struct-value
+        {:fields
+         {"last" {:kind {:string-value "picasso"}},
+          "first" {:kind {:string-value "pablo"}}}}}},
+      "name" {:kind {:string-value "pablo picasso"}}}}}})
+
 (def expected-put-tx [:xtdb.api/put
                       {:xt/id :id-2,
                        :painting-ids [2.0 3.0 76.0 3.0],
