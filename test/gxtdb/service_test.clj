@@ -42,9 +42,9 @@
 (deftest status-test
   (testing "Status return xtdb with MemKv"
     (is (=
+         "xtdb.mem_kv.MemKv"
          (:kv-store @(client/Status
-                      @(connect {:uri (str "http://localhost:" (:port @test-env))}) {}))
-         "xtdb.mem_kv.MemKv"))))
+                      @(connect {:uri (str "http://localhost:" (:port @test-env))}) {}))))))
 
 (deftest submit-tx-test
   (testing "Submit a put tx to xtdb-node"

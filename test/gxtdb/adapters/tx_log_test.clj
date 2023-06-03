@@ -57,23 +57,23 @@
 
 (deftest tx-log-adapters-testing
   (testing "Testing if put transactions parses correctly"
-    (is (= (tx-log/->put var->put-tx) expected-put-tx)))
+    (is (= expected-put-tx (tx-log/->put var->put-tx))))
   (testing "Testing if delete transactions parses correctly"
-    (is (= (tx-log/->delete var->delete-tx) expected-delete-tx)))
+    (is (= expected-delete-tx (tx-log/->delete var->delete-tx))))
   (testing "Testing if evict transactions parses correctly"
-    (is (= (tx-log/->evict var->evict-tx) expected-evict-tx)))
+    (is (= expected-evict-tx (tx-log/->evict var->evict-tx))))
   (testing "Testing if match transactions parses correctly"
-    (is (= (tx-log/->match var->match-tx) expected-match-tx)))
+    (is (= expected-match-tx (tx-log/->match var->match-tx))))
   (testing "Testing if proto tx-ops becomes xtdb datalog transaction"
     (let [tx-ops  (tx-log/proto->tx-log var->tx-ops)]
-      (is (= tx-ops
-             [[:xtdb.api/put {:xt/id :id1, :key "value"}]
+      (is (= [[:xtdb.api/put {:xt/id :id1, :key "value"}]
               [:xtdb.api/evict 45]
               [:xtdb.api/delete #uuid "f2eed61a-1928-4d75-8620-debfc23eae8d"]
-              [:xtdb.api/match {:key "value" :xt/id :id3}]])))))
+              [:xtdb.api/match {:key "value" :xt/id :id3}]]
+             tx-ops)))))
 
 (deftest xtdb-edn->proto-test
   (testing "Testing if submit tx response can be parsed to proto"
     (let [proto (tx-log/xtdb->proto {:xtdb.api/tx-id 0, :xtdb.api/tx-time #inst "2023-05-20T18:12:24.836Z"})]
       (is (inst? (-> proto :tx-time utils/->inst)))
-      (is (= (:tx-id proto) 0)))))
+      (is (= 0 (:tx-id proto))))))

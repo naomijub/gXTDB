@@ -16,4 +16,4 @@
 
 (deftest json-value-test
   (testing "convert proto to value"
-    (is (= (json/value-record->edn edn) json))))
+    (is (= json (json/value-record->edn edn)))))
