@@ -65,4 +65,3 @@
                :output  {:f com.xtdb.protos/pb->EntityTxResponse :ch output}
                :metadata metadata}]
      (p/then (send-unary-params input params) (fn [_] (invoke-unary client desc output))))))
-

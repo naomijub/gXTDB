@@ -40,8 +40,36 @@
 
   (def *server (atom nil))
 
-  (do (some-> @*server server/stop)
-      (reset! *server (-main)))
+  ;; Start the server and add some helper functions.
+  (do
+    (require '[com.xtdb.protos.GrpcApi.client :as client])
+    (require '[protojure.grpc.client.providers.http2 :refer [connect]])
+
+    (some-> @*server server/stop)
+    (reset! *server (-main))
+
+    (defn invoke
+      ([rpc-call]
+       (invoke rpc-call {}))
+      ([rpc-call params]
+       @(rpc-call
+         @(connect {:uri (str "http://localhost:" (::server/port @*server))})
+         params))))
+
+  ;; Do some manual calls.
+  (invoke client/Status)
+
+  (invoke client/SubmitTx
+          {:tx-ops
+           [{:transaction-type
+             {:put {:id-type :keyword
+                    :xt-id "id1"
+                    :document {:fields
+                               {"key" {:kind {:string-value "value"}}}}}}}]})
+
+  (invoke client/Entity
+          {:eid {:id-type :keyword
+                 :xt-id "id1"}})
 
   ())
 

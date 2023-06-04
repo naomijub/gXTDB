@@ -41,7 +41,12 @@
     [_this _request]
     (let [status (xt/status xtdb-node)]
       {:status 200
-       :body  (status-adapter/edn->grpc status)})))
+       :body (status-adapter/edn->grpc status)}))
+  (Entity
+    [_this {{:keys [eid]} :grpc-params}]
+    (let [document (xt/entity (xt/db xtdb-node) (entity-adapter/eid->grpc eid))]
+      {:status 200
+       :body (entity-adapter/document->grpc eid document)})))
 
 (def common-interceptors [(body-params/body-params) http/html-body])
 

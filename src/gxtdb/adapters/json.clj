@@ -1,5 +1,6 @@
 (ns gxtdb.adapters.json
-  (:require [gxtdb.utils :as utils]))
+  (:require [gxtdb.utils :as utils]
+            [clojure.walk :as walk]))
 
 (defn value-record->edn [record]
   (let [kind (:kind record)
