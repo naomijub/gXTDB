@@ -1,18 +1,17 @@
-#_{:clj-kondo/ignore [:refer-all]}
 (ns gxtdb.service-test
-  (:require [clojure.test :refer :all]
-            [com.xtdb.protos.GrpcApi.client :refer :all]
+  (:require [clojure.test :refer [deftest testing is use-fixtures]]
+            [com.xtdb.protos.GrpcApi.client :as client]
             [io.pedestal.http :as pedestal]
-            [io.pedestal.test :refer :all]
             [protojure.grpc.client.providers.http2 :refer [connect]]
             [protojure.pedestal.core :as protojure.pedestal]
             [xtdb.api :as xt]
             [gxtdb.service :as service]
             [gxtdb.utils :as utils]))
 
+;; Setup.
 (def ^:dynamic *opts* {})
 
-(def xtdb-server (service/grpc-routes  (xt/start-node *opts*)))
+(def xtdb-server (service/grpc-routes (xt/start-node *opts*)))
 
 (def test-env (atom {}))
 
@@ -38,28 +37,32 @@
   (destroy-service))
 
 (use-fixtures :each wrap-service)
+
+;; Tests.
 (deftest status-test
   (testing "Status return xtdb with MemKv"
     (is (=
-         (:kv-store @(Status @(connect {:uri (str "http://localhost:" (:port @test-env))}) {}))
-         "xtdb.mem_kv.MemKv"))))
+         "xtdb.mem_kv.MemKv"
+         (:kv-store @(client/Status
+                      @(connect {:uri (str "http://localhost:" (:port @test-env))}) {}))))))
 
 (deftest submit-tx-test
   (testing "Submit a put tx to xtdb-node"
-    (let [tx @(SubmitTx @(connect {:uri (str "http://localhost:" (:port @test-env))})
-                        {:tx-ops [{:transaction-type
-                                   {:put {:id-type :keyword, :xt-id "id1", :document {:fields {"key" {:kind {:string-value "value"}}}}}}}]})]
+    (let [tx @(client/SubmitTx
+               @(connect {:uri (str "http://localhost:" (:port @test-env))})
+               {:tx-ops [{:transaction-type
+                          {:put {:id-type :keyword, :xt-id "id1", :document {:fields {"key" {:kind {:string-value "value"}}}}}}}]})]
       (is (inst? (-> tx :tx-time utils/->inst)))
       (is (>=
            (:tx-id tx)
            0))))
 
   (testing "Submit a match tx to xtdb-node"
-    (let [tx @(SubmitTx @(connect {:uri (str "http://localhost:" (:port @test-env))})
-                        {:tx-ops [{:transaction-type
-                                   {:match {:id-type :keyword, :valid-time "123" , :document-id "id1", :document {:fields {"key" {:kind {:string-value "value"}}}}}}}]})]
+    (let [tx @(client/SubmitTx
+               @(connect {:uri (str "http://localhost:" (:port @test-env))})
+               {:tx-ops [{:transaction-type
+                          {:match {:id-type :keyword, :valid-time "123" , :document-id "id1", :document {:fields {"key" {:kind {:string-value "value"}}}}}}}]})]
       (is (inst? (-> tx :tx-time utils/->inst)))
       (is (>=
            (:tx-id tx)
            0)))))
-

@@ -1,6 +1,5 @@
 (ns gxtdb.adapters.json-test
-  #_{:clj-kondo/ignore [:refer-all]}
-  (:require [clojure.test :refer :all]
+  (:require [clojure.test :refer [deftest testing is]]
             [gxtdb.adapters.json :as json]))
 
 (def edn {:kind {:struct-value {:fields
@@ -17,4 +16,4 @@
 
 (deftest json-value-test
   (testing "convert proto to value"
-    (is (= (json/value-record->edn edn) json))))
+    (is (= json (json/value-record->edn edn)))))

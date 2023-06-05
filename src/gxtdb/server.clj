@@ -35,6 +35,16 @@
   (println "\nCreating your server...")
   (server/start (runnable-service xtdb-in-memory-node)))
 
+(comment
+  ;; For the REPL.
+
+  (def *server (atom nil))
+
+  (do (some-> @*server server/stop)
+      (reset! *server (-main)))
+
+  ())
+
 ;; If you package the service up as a WAR,
 ;; some form of the following function sections is required (for io.pedestal.servlet.ClojureVarServlet).
 
@@ -53,4 +63,3 @@
 ;;  [_]
 ;;  (server/servlet-destroy @servlet)
 ;;  (reset! servlet nil))
-
