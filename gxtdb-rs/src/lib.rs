@@ -5,6 +5,7 @@ mod api {
     tonic::include_proto!("mod");
 }
 
+pub mod status;
 pub use crate::api::com::xtdb::protos as proto_api;
 use crate::api::com::xtdb::protos::{grpc_api_client::GrpcApiClient, Empty};
 
@@ -62,8 +63,8 @@ impl Client {
     /// This function will return error `tonic::Status`.
     pub async fn status(
         &mut self,
-    ) -> Result<tonic::Response<proto_api::StatusResponse>, tonic::Status> {
+    ) -> Result<status::Response, tonic::Status> {
         let request = tonic::Request::new(Empty {});
-        self.client.status(request).await
+        self.client.status(request).await.map(|status| status.into_inner().into())
     }
 }
