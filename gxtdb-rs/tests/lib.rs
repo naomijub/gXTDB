@@ -6,8 +6,8 @@ pub mod mock;
 
 #[tokio::test]
 async fn test_status_response() {
-    let expected = gxtdb_rs::proto_api::StatusResponse::default();
+    let expected = gxtdb_rs::proto_api::StatusResponse::default().into();
     let mut client = mock::client().await;
     let status = client.status().await.unwrap();
-    assert_eq!(status.into_inner(), expected);
+    assert_eq!(status, expected);
 }
