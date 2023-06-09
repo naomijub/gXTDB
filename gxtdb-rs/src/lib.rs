@@ -1,5 +1,7 @@
 mod api {
     #![allow(clippy::enum_variant_names)]
+    #![allow(clippy::nursery)]
+    #![allow(clippy::pedantic)]
     tonic::include_proto!("mod");
 }
 
@@ -17,25 +19,47 @@ impl From<proto_api::OptionString> for Option<String> {
     }
 }
 
+/// It has the `gRPC` Client for XTDB.
+///
+/// `Client` Contains the following functions:
+/// * `status` requests endpoint `/status` via `gRPC`. No args expected as input
+
+/// Struct to define all required paramenters to have a client.
 #[derive(Debug)]
 pub struct Client {
     client: GrpcApiClient<Channel>,
 }
 
 impl Client {
+    /// Implement client needs in order to have a `gRPC` client instance.
+    ///
+    ///  Returns a `gRPC` client connection.
+    ///
+    /// # Arguments
+    ///
+    /// *`host`
+    /// *`port`
+    ///
+    ///  # Errors
+    ///
+    /// The return will be `tonic::transport::Error` if this function does not encounter the host or port.
     pub async fn new(host: &str, port: u16) -> Result<Self, tonic::transport::Error> {
         let url = format!("{host}:{port}");
         Ok(Self {
             client: GrpcApiClient::connect(url).await?,
         })
     }
-
+    #[must_use]
     pub fn new_with_channel(channel: Channel) -> Self {
         Self {
             client: GrpcApiClient::new(channel),
         }
     }
-
+    /// * `status` requests endpoint `/status` via `gRPC`. No args. Returns `StatusResponse`.
+    ///
+    /// # Errors
+    ///
+    /// This function will return error `tonic::Status`.
     pub async fn status(
         &mut self,
     ) -> Result<tonic::Response<proto_api::StatusResponse>, tonic::Status> {

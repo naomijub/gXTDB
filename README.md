@@ -38,6 +38,13 @@ Assuming Homebrew is already installed. (If not, see instructions for installing
 brew install protobuf 
 ```
 
+
+## [gRPC Rust Client](gxtdb-rs/docs/gxtdb-rs.md)
+
+Available endpoints
+
+ - [status](gxtdb-rs/docs/gxtdb-rs.md#status-example-response)
+
 # Protojure stuff [From template]
 
 ## Usage

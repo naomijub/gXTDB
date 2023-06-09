@@ -26,21 +26,10 @@
   [_request]
   (ring-resp/response "Hello from gxtdb, backed by Protojure Template!"))
 
-;; -- PROTOC-GEN-CLOJURE --
-;; Implement our "Greeter" service interface.  The compiler generates
-;; a defprotocol (greeter/Service, in this case), and it is our job
-;; to define an implementation of every function within it.  These will be
-;; invoked whenever a request arrives, similarly to if we had defined
-;; these functions as pedestal defhandlers.  The main difference is that
-;; the :body returned in the response should correlate to the protobuf
-;; return-type declared in the Service definition within the .proto
-;;
-;; Note that our GRPC parameters are associated with the request-map
-;; as :grpc-params, similar to how the pedestal body-param module
-;; injects other types, like :json-params, :edn-params, etc.
-;;
-;; see http://pedestal.io/reference/request-map
-
+;; -- XTDB-DOCS --
+;; Available functionalities:
+;; - submittx: writes transactions in a log and returns details about the transactor.
+;; - status: return status of a xtdb-node.
 (defonce xtdb-in-memory-node (xt/start-node {}))
 
 (deftype GrpcAPI [xtdb-node]
