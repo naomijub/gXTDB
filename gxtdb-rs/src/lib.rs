@@ -61,9 +61,7 @@ impl Client {
     /// # Errors
     ///
     /// This function will return error `tonic::Status`.
-    pub async fn status(
-        &mut self,
-    ) -> Result<status::Response, tonic::Status> {
+    pub async fn status(&mut self) -> Result<status::Response, tonic::Status> {
         let request = tonic::Request::new(Empty {});
         self.client
             .status(request)
