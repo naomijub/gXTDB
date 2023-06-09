@@ -65,6 +65,9 @@ impl Client {
         &mut self,
     ) -> Result<status::Response, tonic::Status> {
         let request = tonic::Request::new(Empty {});
-        self.client.status(request).await.map(|status| status.into_inner().into())
+        self.client
+            .status(request)
+            .await
+            .map(|status| status.into_inner().into())
     }
 }
