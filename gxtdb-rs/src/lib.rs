@@ -5,7 +5,9 @@ mod api {
     tonic::include_proto!("mod");
 }
 
+pub mod json_prost_helper;
 pub mod status;
+pub mod transactions;
 pub use crate::api::com::xtdb::protos as proto_api;
 use crate::api::com::xtdb::protos::{grpc_api_client::GrpcApiClient, Empty};
 
