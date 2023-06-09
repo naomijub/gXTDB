@@ -19,8 +19,8 @@ impl From<proto_api::StatusResponse> for Response {
             kv_store: value.kv_store,
             estimate_num_keys: value.estimate_num_keys,
             size: value.size,
-            revision: value.revision.and_then(|rev| rev.into()),
-            consumer_state: value.consumer_state.and_then(|cons| cons.into()),
+            revision: value.revision.and_then(std::convert::Into::into),
+            consumer_state: value.consumer_state.and_then(std::convert::Into::into),
         }
     }
 }
