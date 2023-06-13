@@ -14,7 +14,8 @@
             [protojure.pedestal.core :as protojure.pedestal]
             [protojure.pedestal.routes :as proutes]
             [com.xtdb.protos.GrpcApi.server :as api]
-            [gxtdb.adapters.tx-log :as tx-log]))
+            [gxtdb.adapters.tx-log :as tx-log]
+            [gxtdb.adapters.tx-time :as tx-time]))
 
 (defn about-page
   [_request]
@@ -35,9 +36,9 @@
 (deftype GrpcAPI [xtdb-node]
   api/Service
   (SubmitTx [_this {{:keys [tx-ops tx-time]} :grpc-params}]
-    (println tx-time)
-    (let [tx-log (tx-log-adapter/proto->tx-log tx-ops)
-          xt-response (xt/submit-tx xtdb-node tx-log)]
+    (let [time   (tx-time/->clj-time tx-time)
+          tx-log (tx-log-adapter/proto->tx-log tx-ops)
+          xt-response (if (nil? time) (xt/submit-tx xtdb-node tx-log) (xt/submit-tx xtdb-node tx-log {::xt/tx-time time}))]
       {:status 200
        :body (tx-log-adapter/xtdb->proto xt-response)}))
   (Status
