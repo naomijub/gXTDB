@@ -393,10 +393,11 @@
 ;-----------------------------------------------------------------------------
 ; SubmitRequest
 ;-----------------------------------------------------------------------------
-(defrecord SubmitRequest-record [tx-ops]
+(defrecord SubmitRequest-record [tx-ops tx-time]
   pb/Writer
   (serialize [this os]
-    (serdes.complex/write-repeated serdes.core/write-embedded 1 (:tx-ops this) os))
+    (serdes.complex/write-repeated serdes.core/write-embedded 1 (:tx-ops this) os)
+    (serdes.core/write-embedded 2 (:tx-time this) os))
   pb/TypeReflection
   (gettype [this]
     "com.xtdb.protos.SubmitRequest"))
@@ -407,7 +408,7 @@
 (defn cis->SubmitRequest
   "CodedInputStream to SubmitRequest"
   [is]
-  (map->SubmitRequest-record (tag-map SubmitRequest-defaults (fn [tag index] (case index 1 [:tx-ops (serdes.complex/cis->repeated ecis->Transaction is)] [index (serdes.core/cis->undefined tag is)])) is)))
+  (map->SubmitRequest-record (tag-map SubmitRequest-defaults (fn [tag index] (case index 1 [:tx-ops (serdes.complex/cis->repeated ecis->Transaction is)] 2 [:tx-time (ecis->OptionDatetime is)] [index (serdes.core/cis->undefined tag is)])) is)))
 
 (defn ecis->SubmitRequest
   "Embedded CodedInputStream to SubmitRequest"
@@ -422,6 +423,7 @@
   {:pre [(if (s/valid? ::SubmitRequest-spec init) true (throw (ex-info "Invalid input" (s/explain-data ::SubmitRequest-spec init))))]}
   (-> (merge SubmitRequest-defaults init)
       (cond-> (some? (get init :tx-ops)) (update :tx-ops #(map new-Transaction %)))
+      (cond-> (some? (get init :tx-time)) (update :tx-time new-OptionDatetime))
       (map->SubmitRequest-record)))
 
 (defn pb->SubmitRequest
@@ -517,11 +519,10 @@
 ;-----------------------------------------------------------------------------
 ; Transaction
 ;-----------------------------------------------------------------------------
-(defrecord Transaction-record [transaction-type tx-time]
+(defrecord Transaction-record [transaction-type]
   pb/Writer
   (serialize [this os]
-    (write-Transaction-transaction-type  (:transaction-type this) os)
-    (serdes.core/write-embedded 5 (:tx-time this) os))
+    (write-Transaction-transaction-type  (:transaction-type this) os))
   pb/TypeReflection
   (gettype [this]
     "com.xtdb.protos.Transaction"))
@@ -532,7 +533,7 @@
 (defn cis->Transaction
   "CodedInputStream to Transaction"
   [is]
-  (map->Transaction-record (tag-map Transaction-defaults (fn [tag index] (case index 1 [:transaction-type {:put (ecis->Put is)}] 2 [:transaction-type {:delete (ecis->Delete is)}] 3 [:transaction-type {:evict (ecis->Evict is)}] 4 [:transaction-type {:match (ecis->Match is)}] 5 [:tx-time (ecis->OptionDatetime is)] [index (serdes.core/cis->undefined tag is)])) is)))
+  (map->Transaction-record (tag-map Transaction-defaults (fn [tag index] (case index 1 [:transaction-type {:put (ecis->Put is)}] 2 [:transaction-type {:delete (ecis->Delete is)}] 3 [:transaction-type {:evict (ecis->Evict is)}] 4 [:transaction-type {:match (ecis->Match is)}] [index (serdes.core/cis->undefined tag is)])) is)))
 
 (defn ecis->Transaction
   "Embedded CodedInputStream to Transaction"
@@ -546,7 +547,6 @@
   [init]
   {:pre [(if (s/valid? ::Transaction-spec init) true (throw (ex-info "Invalid input" (s/explain-data ::Transaction-spec init))))]}
   (-> (merge Transaction-defaults init)
-      (cond-> (some? (get init :tx-time)) (update :tx-time new-OptionDatetime))
       (convert-Transaction-transaction-type)
       (map->Transaction-record)))
 

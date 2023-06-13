@@ -56,6 +56,15 @@
       (is (>=
            (:tx-id tx)
            0))))
+  #_(testing "Submit a put tx to xtdb-node with tx-time"
+      (let [tx @(client/SubmitTx
+                 @(connect {:uri (str "http://localhost:" (:port @test-env))})
+                 {:tx-ops [{:transaction-type
+                            {:put {:id-type :keyword, :xt-id "id1", :document {:fields {"key" {:kind {:string-value "value"}}}}}}}]})]
+        (is (inst? (-> tx :tx-time utils/->inst)))
+        (is (>=
+             (:tx-id tx)
+             0))))
 
   (testing "Submit a match tx to xtdb-node"
     (let [tx @(client/SubmitTx

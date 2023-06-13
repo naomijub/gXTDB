@@ -11,7 +11,6 @@ message Transaction {
     Evict evict = 3;
     Match match = 4;
   }
-  OptionDatetime tx_time = 5;
 }
 
 enum IdType {
@@ -50,7 +49,10 @@ message Match {
   OptionDatetime valid_time = 4;
 }
 
-message SubmitRequest { repeated Transaction tx_ops = 1; }
+message SubmitRequest { 
+  repeated Transaction tx_ops = 1;
+  OptionDatetime tx_time = 2; 
+}
 
 message SubmitResponse {
   string tx_time = 1;

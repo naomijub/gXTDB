@@ -34,7 +34,8 @@
 
 (deftype GrpcAPI [xtdb-node]
   api/Service
-  (SubmitTx [_this {{:keys [tx-ops]} :grpc-params}]
+  (SubmitTx [_this {{:keys [tx-ops tx-time]} :grpc-params}]
+    (println tx-time)
     (let [tx-log (tx-log-adapter/proto->tx-log tx-ops)
           xt-response (xt/submit-tx xtdb-node tx-log)]
       {:status 200
