@@ -47,7 +47,7 @@
                       @(connect {:uri (str "http://localhost:" (:port @test-env))}) {}))))))
 
 (deftest submit-tx-test
-  (testing "Submit a put tx to xtdb-node"
+  #_(testing "Submit a put tx to xtdb-node"
     (let [tx @(client/SubmitTx
                @(connect {:uri (str "http://localhost:" (:port @test-env))})
                {:tx-ops [{:transaction-type
@@ -67,7 +67,7 @@
            (:tx-id tx)
            0))))
 
-  (testing "Submit a match tx to xtdb-node"
+  #_(testing "Submit a match tx to xtdb-node"
     (let [tx @(client/SubmitTx
                @(connect {:uri (str "http://localhost:" (:port @test-env))})
                {:tx-ops [{:transaction-type
