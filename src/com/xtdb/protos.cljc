@@ -295,12 +295,14 @@
 ;-----------------------------------------------------------------------------
 ; Put
 ;-----------------------------------------------------------------------------
-(defrecord Put-record [id-type xt-id document]
+(defrecord Put-record [id-type xt-id document valid-time end-valid-time]
   pb/Writer
   (serialize [this os]
     (write-IdType 1  {:optimize true} (:id-type this) os)
     (serdes.core/write-String 2  {:optimize true} (:xt-id this) os)
-    (serdes.core/write-embedded 3 (:document this) os))
+    (serdes.core/write-embedded 3 (:document this) os)
+    (serdes.core/write-embedded 4 (:valid-time this) os)
+    (serdes.core/write-embedded 5 (:end-valid-time this) os))
   pb/TypeReflection
   (gettype [this]
     "com.xtdb.protos.Put"))
@@ -314,7 +316,7 @@
 (defn cis->Put
   "CodedInputStream to Put"
   [is]
-  (map->Put-record (tag-map Put-defaults (fn [tag index] (case index 1 [:id-type (cis->IdType is)] 2 [:xt-id (serdes.core/cis->String is)] 3 [:document (com.google.protobuf/ecis->Struct is)] [index (serdes.core/cis->undefined tag is)])) is)))
+  (map->Put-record (tag-map Put-defaults (fn [tag index] (case index 1 [:id-type (cis->IdType is)] 2 [:xt-id (serdes.core/cis->String is)] 3 [:document (com.google.protobuf/ecis->Struct is)] 4 [:valid-time (ecis->OptionDatetime is)] 5 [:end-valid-time (ecis->OptionDatetime is)] [index (serdes.core/cis->undefined tag is)])) is)))
 
 (defn ecis->Put
   "Embedded CodedInputStream to Put"
@@ -329,6 +331,8 @@
   {:pre [(if (s/valid? ::Put-spec init) true (throw (ex-info "Invalid input" (s/explain-data ::Put-spec init))))]}
   (-> (merge Put-defaults init)
       (cond-> (some? (get init :document)) (update :document com.google.protobuf/new-Struct))
+      (cond-> (some? (get init :valid-time)) (update :valid-time new-OptionDatetime))
+      (cond-> (some? (get init :end-valid-time)) (update :end-valid-time new-OptionDatetime))
       (map->Put-record)))
 
 (defn pb->Put
@@ -341,24 +345,27 @@
 ;-----------------------------------------------------------------------------
 ; Delete
 ;-----------------------------------------------------------------------------
-(defrecord Delete-record [document-id id-type]
+(defrecord Delete-record [document-id id-type valid-time end-valid-time]
   pb/Writer
   (serialize [this os]
     (serdes.core/write-String 1  {:optimize true} (:document-id this) os)
-    (write-IdType 2  {:optimize true} (:id-type this) os))
+    (write-IdType 2  {:optimize true} (:id-type this) os)
+    (serdes.core/write-embedded 3 (:valid-time this) os)
+    (serdes.core/write-embedded 4 (:end-valid-time this) os))
   pb/TypeReflection
   (gettype [this]
     "com.xtdb.protos.Delete"))
 
 (s/def :com.xtdb.protos.Delete/document-id string?)
 (s/def :com.xtdb.protos.Delete/id-type (s/or :keyword keyword? :int int?))
+
 (s/def ::Delete-spec (s/keys :opt-un [:com.xtdb.protos.Delete/document-id :com.xtdb.protos.Delete/id-type]))
 (def Delete-defaults {:document-id "" :id-type IdType-default})
 
 (defn cis->Delete
   "CodedInputStream to Delete"
   [is]
-  (map->Delete-record (tag-map Delete-defaults (fn [tag index] (case index 1 [:document-id (serdes.core/cis->String is)] 2 [:id-type (cis->IdType is)] [index (serdes.core/cis->undefined tag is)])) is)))
+  (map->Delete-record (tag-map Delete-defaults (fn [tag index] (case index 1 [:document-id (serdes.core/cis->String is)] 2 [:id-type (cis->IdType is)] 3 [:valid-time (ecis->OptionDatetime is)] 4 [:end-valid-time (ecis->OptionDatetime is)] [index (serdes.core/cis->undefined tag is)])) is)))
 
 (defn ecis->Delete
   "Embedded CodedInputStream to Delete"
@@ -371,7 +378,10 @@
   "
   [init]
   {:pre [(if (s/valid? ::Delete-spec init) true (throw (ex-info "Invalid input" (s/explain-data ::Delete-spec init))))]}
-  (map->Delete-record (merge Delete-defaults init)))
+  (-> (merge Delete-defaults init)
+      (cond-> (some? (get init :valid-time)) (update :valid-time new-OptionDatetime))
+      (cond-> (some? (get init :end-valid-time)) (update :end-valid-time new-OptionDatetime))
+      (map->Delete-record)))
 
 (defn pb->Delete
   "Protobuf to Delete"
@@ -507,10 +517,11 @@
 ;-----------------------------------------------------------------------------
 ; Transaction
 ;-----------------------------------------------------------------------------
-(defrecord Transaction-record [transaction-type]
+(defrecord Transaction-record [transaction-type tx-time]
   pb/Writer
   (serialize [this os]
-    (write-Transaction-transaction-type  (:transaction-type this) os))
+    (write-Transaction-transaction-type  (:transaction-type this) os)
+    (serdes.core/write-embedded 5 (:tx-time this) os))
   pb/TypeReflection
   (gettype [this]
     "com.xtdb.protos.Transaction"))
@@ -521,7 +532,7 @@
 (defn cis->Transaction
   "CodedInputStream to Transaction"
   [is]
-  (map->Transaction-record (tag-map Transaction-defaults (fn [tag index] (case index 1 [:transaction-type {:put (ecis->Put is)}] 2 [:transaction-type {:delete (ecis->Delete is)}] 3 [:transaction-type {:evict (ecis->Evict is)}] 4 [:transaction-type {:match (ecis->Match is)}] [index (serdes.core/cis->undefined tag is)])) is)))
+  (map->Transaction-record (tag-map Transaction-defaults (fn [tag index] (case index 1 [:transaction-type {:put (ecis->Put is)}] 2 [:transaction-type {:delete (ecis->Delete is)}] 3 [:transaction-type {:evict (ecis->Evict is)}] 4 [:transaction-type {:match (ecis->Match is)}] 5 [:tx-time (ecis->OptionDatetime is)] [index (serdes.core/cis->undefined tag is)])) is)))
 
 (defn ecis->Transaction
   "Embedded CodedInputStream to Transaction"
@@ -535,6 +546,7 @@
   [init]
   {:pre [(if (s/valid? ::Transaction-spec init) true (throw (ex-info "Invalid input" (s/explain-data ::Transaction-spec init))))]}
   (-> (merge Transaction-defaults init)
+      (cond-> (some? (get init :tx-time)) (update :tx-time new-OptionDatetime))
       (convert-Transaction-transaction-type)
       (map->Transaction-record)))
 

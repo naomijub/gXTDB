@@ -11,6 +11,7 @@ message Transaction {
     Evict evict = 3;
     Match match = 4;
   }
+  OptionDatetime tx_time = 5;
 }
 
 enum IdType {
@@ -26,11 +27,15 @@ message Put {
   IdType id_type = 1;
   string xt_id = 2;
   google.protobuf.Struct document = 3;
+  OptionDatetime valid_time = 4;
+  OptionDatetime end_valid_time = 5;
 }
 
 message Delete {
   string document_id = 1;
   IdType id_type = 2;
+  OptionDatetime valid_time = 3;
+  OptionDatetime end_valid_time = 4;
 }
 
 message Evict {
