@@ -38,7 +38,9 @@
   (SubmitTx [_this {{:keys [tx-ops tx-time]} :grpc-params}]
     (let [time   (tx-time/->clj-time tx-time)
           tx-log (tx-log-adapter/proto->tx-log tx-ops)
-          xt-response (if (nil? time) (xt/submit-tx xtdb-node tx-log) (xt/submit-tx xtdb-node tx-log {::xt/tx-time time}))]
+          xt-response (if (nil? time)
+                        (xt/submit-tx xtdb-node tx-log)
+                        (xt/submit-tx xtdb-node tx-log {::xt/tx-time time}))]
       {:status 200
        :body (tx-log-adapter/xtdb->proto xt-response)}))
   (Status

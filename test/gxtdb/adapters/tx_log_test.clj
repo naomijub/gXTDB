@@ -5,7 +5,9 @@
 
 (def var->put-tx
   {:put
-   {:xt-id "id 2",
+   {:valid-time {:value {:some "2023-06-12T21:32:44.717-05:00"}}
+    :end-valid-time {:value {:some "2023-06-12T21:32:44.717-05:00"}}
+    :xt-id "id 2",
     :document
     {:fields
      {"painting ids"
@@ -32,7 +34,10 @@
                        :age 200.0,
                        :is-artist? true,
                        :full-name {:last "picasso", :first "pablo"},
-                       :name "pablo picasso"}])
+                       :name "pablo picasso"}
+                      #inst "2023-06-13T02:32:44.717-00:00" ;;valid-time
+                      #inst "2023-06-13T02:32:44.717-00:00" ;;end-valid-time
+                      ])
 
 (def var->delete-tx {:delete {:document-id "f2eed61a-1928-4d75-8620-debfc23eae8d", :id-type :uuid}})
 (def expected-delete-tx [:xtdb.api/delete #uuid "f2eed61a-1928-4d75-8620-debfc23eae8d"])

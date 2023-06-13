@@ -16,6 +16,10 @@ fmt: cljfmt rsfmt
 
 fix: fmt lint
 
+fix-clj: cljfmt kibit
+
+fix-rs: rsfmt clippy
+
 proto:
 	protoc --clojure_out=grpc-client,grpc-server:src --proto_path=resources resources/transactions.proto resources/service.proto
 
