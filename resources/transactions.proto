@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package com.xtdb.protos;
 import "google/protobuf/struct.proto";
+import "helper.proto";
 
 message Transaction {
   oneof transaction_type {
@@ -19,14 +20,7 @@ enum IdType {
   Int = 3;
 }
 
-message Empty {}
 
-message OptionDatetime {
-  oneof value {
-    Empty none = 1;
-    string some = 2;
-  }
-}
 
 message Put {
   IdType id_type = 1;

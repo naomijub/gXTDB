@@ -3,13 +3,8 @@ syntax = "proto3";
 package com.xtdb.protos;
 
 import "transactions.proto";
+import "helper.proto";
 
-message OptionString {
-  oneof value {
-    Empty none = 1;
-    string some = 2;
-  }
-}
 
 message StatusResponse {
   string version = 1;
