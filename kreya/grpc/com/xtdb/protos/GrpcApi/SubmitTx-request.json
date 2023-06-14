@@ -1,12 +1,18 @@
 {
   "txOps": [
     {
+      "match": {
+        "idType":"Int",
+        "documentId": "2",
+        "document": {},
+        "validTime": {"some": "2023-06-12T21:32:44.717-05:00"}
+      }
+    },
+    {
       "put": {
         "xtId": "id1",
         "idType":"Keyword",
-        "document": {"key": "value"},
-        "validTime": {"some": "2023-06-12T21:32:44.717-05:00"},
-        "endValidTime": {"some": "2023-06-13T21:32:44.717-05:00"}
+        "document": {"key": "value"}
       }
     }
   ],

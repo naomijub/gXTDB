@@ -42,11 +42,18 @@
 (def var->delete-tx {:delete {:document-id "f2eed61a-1928-4d75-8620-debfc23eae8d", :id-type :uuid}})
 (def expected-delete-tx [:xtdb.api/delete #uuid "f2eed61a-1928-4d75-8620-debfc23eae8d"])
 
+(def var->delete-tx-with-time {:delete
+                               {:valid-time {:value {:some "2023-06-12T21:32:44.717-05:00"}}
+                                :end-valid-time {:value {:some "2023-06-12T21:32:44.717-05:00"}}
+                                :document-id "f2eed61a-1928-4d75-8620-debfc23eae8d", :id-type :uuid}})
+(def expected-delete-tx-with-time [:xtdb.api/delete #uuid "f2eed61a-1928-4d75-8620-debfc23eae8d" #inst "2023-06-13T02:32:44.717-00:00" #inst "2023-06-13T02:32:44.717-00:00"])
+
 (def var->evict-tx {:evict {:document-id "f2eed61a-1928-4d75-8620-debfc23eae8d", :id-type :uuid}})
 (def expected-evict-tx [:xtdb.api/evict #uuid "f2eed61a-1928-4d75-8620-debfc23eae8d"])
 
 (def var->match-tx {:match {:document-id "id 3", :document {:fields {"id" {:kind {:number-value 3.0}}}}}})
 (def expected-match-tx [:xtdb.api/match
+                        :id-3
                         {:xt/id :id-3,
                          :id 3.0}])
 
@@ -58,13 +65,15 @@
    {:transaction-type
     {:delete {:document-id "f2eed61a-1928-4d75-8620-debfc23eae8d", :id-type :uuid}}}
    {:transaction-type
-    {:match {:id-type :keyword, :document-id "id3", :document {:fields {"key" {:kind {:string-value "value"}}}} :valid-time "2023-05-20T19:12:24.836Z"}}}])
+    {:match {:id-type :keyword, :document-id "id3", :document {:fields {"key" {:kind {:string-value "value"}}}} :valid-time {:value {:some "2023-06-12T21:32:44.717-05:00"}}}}}])
 
 (deftest tx-log-adapters-testing
   (testing "Testing if put transactions parses correctly"
     (is (= expected-put-tx (tx-log/->put var->put-tx))))
   (testing "Testing if delete transactions parses correctly"
     (is (= expected-delete-tx (tx-log/->delete var->delete-tx))))
+  (testing "Testing if delete transactions parses correctly with valid-times"
+    (is (= expected-delete-tx-with-time (tx-log/->delete var->delete-tx-with-time))))
   (testing "Testing if evict transactions parses correctly"
     (is (= expected-evict-tx (tx-log/->evict var->evict-tx))))
   (testing "Testing if match transactions parses correctly"
@@ -74,7 +83,7 @@
       (is (= [[:xtdb.api/put {:xt/id :id1, :key "value"}]
               [:xtdb.api/evict 45]
               [:xtdb.api/delete #uuid "f2eed61a-1928-4d75-8620-debfc23eae8d"]
-              [:xtdb.api/match {:key "value" :xt/id :id3}]]
+              [:xtdb.api/match :id3 {:key "value" :xt/id :id3}  #inst "2023-06-13T02:32:44.717-00:00"]]
              tx-ops)))))
 
 (deftest xtdb-edn->proto-test

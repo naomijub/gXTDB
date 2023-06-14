@@ -8,8 +8,7 @@
             [protojure.pedestal.core :as protojure.pedestal]
             [protojure.pedestal.routes :as proutes]
             [ring.util.response :as ring-resp]
-            [xtdb.api :as xt]
-            [gxtdb.adapters.tx-time :as tx-time]))
+            [xtdb.api :as xt]))
 
 (defn about-page
   [_request]
