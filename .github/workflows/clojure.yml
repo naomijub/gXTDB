@@ -16,8 +16,8 @@ jobs:
     - name: Install dependencies
       run: lein deps
     - name: Run tests
-      run: lein test >> /dev/stdout
-
+      run: lein test
+      
   formatter:
 
     runs-on: ubuntu-latest
