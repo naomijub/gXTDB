@@ -30,7 +30,6 @@
 (deftype GrpcAPI [xtdb-node]
   api/Service
   (SubmitTx [_this {{:keys [tx-ops tx-time]} :grpc-params}]
-    (println (str "deftype tx-time: " tx-time))
     {:status 200
      :body (controllers/submit-tx xtdb-node tx-ops tx-time)})
   (Status
