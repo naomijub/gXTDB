@@ -12,7 +12,7 @@
     (is (= base-vector (conj-some-valid-timerange base-vector nil :d))))
   (testing "When only init time is not nil, base vector is appended of init-time"
     (is (= [:a :b :c] (conj-some-valid-timerange base-vector :c nil))))
-  (testing "When only init time and end itme are not nil, base vector is appended of init-time and end-time"
+  (testing "When only init time and end time are not nil, base vector is appended of init-time and end-time"
     (is (= [:a :b :c :d] (conj-some-valid-timerange base-vector :c :d)))))
 
 (deftest assoc-time-test
