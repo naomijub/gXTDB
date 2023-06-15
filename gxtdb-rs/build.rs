@@ -5,8 +5,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .include_file("mod.rs")
         .compile(
             &[
-                "../resources/service.proto",
+                "../resources/common.proto",
                 "../resources/transactions.proto",
+                "../resources/service.proto",
             ],
             &["../resources/"],
         )?;

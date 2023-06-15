@@ -3,7 +3,7 @@ syntax = "proto3";
 package com.xtdb.protos;
 
 import "transactions.proto";
-import "helper.proto";
+import "common.proto";
 
 
 message StatusResponse {

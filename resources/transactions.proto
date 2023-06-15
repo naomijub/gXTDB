@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package com.xtdb.protos;
 import "google/protobuf/struct.proto";
-import "helper.proto";
+import "common.proto";
 
 message Transaction {
   oneof transaction_type {
