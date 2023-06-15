@@ -1,5 +1,7 @@
 (ns gxtdb.adapters.tx-log
   (:require [gxtdb.adapters.json :as json]
+            [gxtdb.adapters.tx-time :as tx-time]
+            [gxtdb.logic.time :refer [conj-some-valid-timerange]]
             [gxtdb.utils :as utils]
             [xtdb.api :as xt]))
 
@@ -12,22 +14,35 @@
 (defn ->delete [transaction]
   (let [transaction (:delete transaction)
         id (:document-id transaction)
-        id-type (:id-type transaction)]
-    [::xt/delete (utils/->id id-type id)]))
+        id-type (:id-type transaction)
+        valid-time (-> transaction :valid-time tx-time/->clj-time)
+        end-valid-time (-> transaction :end-valid-time tx-time/->clj-time)]
+    (conj-some-valid-timerange
+     [::xt/delete (utils/->id id-type id)]
+     valid-time
+     end-valid-time)))
 
 (defn ->put [transaction]
   (let [transaction (:put transaction)
         id (:xt-id transaction)
         id-type (:id-type transaction)
-        document (:document transaction)]
-    [::xt/put (into {:xt/id (utils/->id id-type id)} (json/value-record->edn {:kind {:struct-value  document}}))]))
+        document (:document transaction)
+        valid-time (-> transaction :valid-time tx-time/->clj-time)
+        end-valid-time (-> transaction :end-valid-time tx-time/->clj-time)]
+    (conj-some-valid-timerange
+     [::xt/put (into {:xt/id (utils/->id id-type id)} (json/value-record->edn {:kind {:struct-value  document}}))]
+     valid-time
+     end-valid-time)))
 
 (defn ->match [transaction]
   (let [transaction (:match transaction)
         id (:document-id transaction)
         id-type (:id-type transaction)
-        document (:document transaction)]
-    [::xt/match (into {:xt/id (utils/->id id-type id)} (json/value-record->edn {:kind {:struct-value document}}))]))
+        document (:document transaction)
+        valid-time (-> transaction :valid-time tx-time/->clj-time)]
+    (conj-some-valid-timerange
+     [::xt/match (utils/->id id-type id) (into {:xt/id (utils/->id id-type id)} (json/value-record->edn {:kind {:struct-value document}}))]
+     valid-time)))
 
 (defn ->tx-log [ops]
   (let [transaction (:transaction-type ops)

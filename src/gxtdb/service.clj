@@ -1,20 +1,14 @@
 (ns gxtdb.service
-  (:require [io.pedestal.http :as http]
-            [io.pedestal.http.route :as route]
-            [io.pedestal.http.body-params :as body-params]
-            [ring.util.response :as ring-resp]
-
+  (:require [com.xtdb.protos.GrpcApi.server :as api]
             [gxtdb.adapters.status :as status-adapter]
-            [gxtdb.adapters.tx-log :as tx-log-adapter]
-
-            ;; -- XTDB -- 
-            [xtdb.api :as xt]
-
-            ;; -- PROTOC-GEN-CLOJURE --
+            [gxtdb.controllers :as controllers]
+            [io.pedestal.http :as http]
+            [io.pedestal.http.body-params :as body-params]
+            [io.pedestal.http.route :as route]
             [protojure.pedestal.core :as protojure.pedestal]
             [protojure.pedestal.routes :as proutes]
-            [com.xtdb.protos.GrpcApi.server :as api]
-            [gxtdb.adapters.tx-log :as tx-log]))
+            [ring.util.response :as ring-resp]
+            [xtdb.api :as xt]))
 
 (defn about-page
   [_request]
@@ -34,11 +28,9 @@
 
 (deftype GrpcAPI [xtdb-node]
   api/Service
-  (SubmitTx [_this {{:keys [tx-ops]} :grpc-params}]
-    (let [tx-log (tx-log-adapter/proto->tx-log tx-ops)
-          xt-response (xt/submit-tx xtdb-node tx-log)]
-      {:status 200
-       :body (tx-log-adapter/xtdb->proto xt-response)}))
+  (SubmitTx [_this {{:keys [tx-ops tx-time]} :grpc-params}]
+    {:status 200
+     :body (controllers/submit-tx xtdb-node tx-ops tx-time)})
   (Status
     [_this _request]
     (let [status (xt/status xtdb-node)]

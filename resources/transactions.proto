@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package com.xtdb.protos;
 import "google/protobuf/struct.proto";
+import "helper.proto";
 
 message Transaction {
   oneof transaction_type {
@@ -19,24 +20,21 @@ enum IdType {
   Int = 3;
 }
 
-message Empty {}
 
-message OptionDatetime {
-  oneof value {
-    Empty none = 1;
-    string some = 2;
-  }
-}
 
 message Put {
   IdType id_type = 1;
   string xt_id = 2;
   google.protobuf.Struct document = 3;
+  OptionDatetime valid_time = 4;
+  OptionDatetime end_valid_time = 5;
 }
 
 message Delete {
   string document_id = 1;
   IdType id_type = 2;
+  OptionDatetime valid_time = 3;
+  OptionDatetime end_valid_time = 4;
 }
 
 message Evict {
@@ -51,7 +49,10 @@ message Match {
   OptionDatetime valid_time = 4;
 }
 
-message SubmitRequest { repeated Transaction tx_ops = 1; }
+message SubmitRequest { 
+  repeated Transaction tx_ops = 1;
+  OptionDatetime tx_time = 2; 
+}
 
 message SubmitResponse {
   string tx_time = 1;
