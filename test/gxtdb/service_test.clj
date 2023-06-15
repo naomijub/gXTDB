@@ -47,7 +47,7 @@
                       @(connect {:uri (str "http://localhost:" (:port @test-env))}) {}))))))
 
 (deftest submit-tx-test
-  #_(testing "Submit a put tx to xtdb-node"
+  (testing "Submit a put tx to xtdb-node"
       (let [tx @(client/SubmitTx
                  @(connect {:uri (str "http://localhost:" (:port @test-env))})
                  {:tx-ops [{:transaction-type
@@ -56,7 +56,7 @@
         (is (>=
              (:tx-id tx)
              0))))
-  #_(testing "Submit a put tx to xtdb-node with tx-time"
+  (testing "Submit a put tx to xtdb-node with tx-time"
       (let [tx @(client/SubmitTx
                  @(connect {:uri (str "http://localhost:" (:port @test-env))})
                  {:tx-time {:value {:some "2023-06-12T21:32:44.717-05:00"}}
