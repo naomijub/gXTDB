@@ -9,6 +9,7 @@ pub mod status;
 pub use crate::api::com::xtdb::protos as proto_api;
 use crate::api::com::xtdb::protos::{grpc_api_client::GrpcApiClient, Empty};
 
+use chrono::{FixedOffset, Utc};
 use tonic::transport::Channel;
 
 impl From<proto_api::OptionString> for Option<String> {
@@ -16,6 +17,37 @@ impl From<proto_api::OptionString> for Option<String> {
         value.value.and_then(|val| match val {
             proto_api::option_string::Value::None(_) => None,
             proto_api::option_string::Value::Some(s) => Some(s),
+        })
+    }
+}
+
+impl From<proto_api::OptionDatetime> for Option<String> {
+    fn from(value: proto_api::OptionDatetime) -> Self {
+        value.value.and_then(|val| match val {
+            proto_api::option_datetime::Value::None(_) => None,
+            proto_api::option_datetime::Value::Some(s) => Some(s),
+        })
+    }
+}
+
+#[cfg(feature = "chrono")]
+impl From<proto_api::OptionDatetime> for Option<chrono::DateTime<Utc>> {
+    fn from(value: proto_api::OptionDatetime) -> Self {
+        value.value.and_then(|val| match val {
+            proto_api::option_datetime::Value::None(_) => None,
+            proto_api::option_datetime::Value::Some(s) => s.parse::<chrono::DateTime<Utc>>().ok(),
+        })
+    }
+}
+
+#[cfg(feature = "chrono")]
+impl From<proto_api::OptionDatetime> for Option<chrono::DateTime<FixedOffset>> {
+    fn from(value: proto_api::OptionDatetime) -> Self {
+        value.value.and_then(|val| match val {
+            proto_api::option_datetime::Value::None(_) => None,
+            proto_api::option_datetime::Value::Some(s) => {
+                s.parse::<chrono::DateTime<FixedOffset>>().ok()
+            }
         })
     }
 }

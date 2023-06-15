@@ -2,6 +2,7 @@
 //     tonic::include_proto!("com.xtdb.protos");
 // }
 
+pub mod from;
 pub mod mock;
 
 #[tokio::test]
