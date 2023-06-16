@@ -10,7 +10,8 @@
             [clojure.core.async :as async]
             [protojure.grpc.client.utils :refer [send-unary-params invoke-unary]]
             [promesa.core :as p]
-            [protojure.grpc.client.api :as grpc]))
+            [protojure.grpc.client.api :as grpc]
+            [clojure.pprint :as pprint]))
 
 ;-----------------------------------------------------------------------------
 ; GRPC Client Implementation
@@ -52,5 +53,6 @@
                :input   {:f com.xtdb.protos/new-EntityTxRequest :ch input}
                :output  {:f com.xtdb.protos/pb->EntityTxResponse :ch output}
                :metadata metadata}]
+     (pprint/pprint desc)
      (p/then (send-unary-params input params) (fn [_] (invoke-unary client desc output))))))
 

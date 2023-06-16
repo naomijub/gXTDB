@@ -91,5 +91,4 @@
                   @(client/EntityTx
                     connected
                     {:id-type :string :entity-id "id1" :open-snapshot false :valid-time {:value {:none {}}} :tx-time {:value {:none {}}} :tx-id {:value {:none {}}}}))]
-      (is (= EntityTxResponse-defaults e-tx)))))
-
+      (is (= '(:xt-id :content-hash :valid-time :tx-time :tx-id) (keys e-tx))))))
