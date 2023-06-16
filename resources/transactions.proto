@@ -13,15 +13,6 @@ message Transaction {
   }
 }
 
-enum IdType {
-  Uuid = 0;
-  Keyword = 1;
-  String = 2;
-  Int = 3;
-}
-
-
-
 message Put {
   IdType id_type = 1;
   string xt_id = 2;

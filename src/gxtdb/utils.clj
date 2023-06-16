@@ -1,6 +1,7 @@
 (ns gxtdb.utils
   (:require [clojure.instant :refer [read-instant-date]]
-            [clojure.string :as str])
+            [clojure.string :as str]
+            [xtdb.api :as xt])
   (:import java.text.SimpleDateFormat))
 
 #_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
@@ -56,3 +57,10 @@
         ks (keys record)
         vs (map f (vals record))]
     (zipmap ks vs)))
+
+(defn open-db [xtdb-node should-open-snapshot db-basis]
+  (case [should-open-snapshot (nil? db-basis)]
+    [true true] (xt/open-db xtdb-node)
+    [false true] (xt/db xtdb-node)
+    [true false] (xt/open-db xtdb-node db-basis)
+    [false false] (xt/db xtdb-node db-basis)))

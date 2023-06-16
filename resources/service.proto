@@ -3,6 +3,7 @@ syntax = "proto3";
 package com.xtdb.protos;
 
 import "transactions.proto";
+import "entity.proto";
 import "common.proto";
 
 
@@ -20,4 +21,6 @@ service GrpcApi {
   rpc Status(Empty) returns (StatusResponse);
   rpc SubmitTx(com.xtdb.protos.SubmitRequest)
       returns (com.xtdb.protos.SubmitResponse);
+  rpc EntityTx(com.xtdb.protos.EntityTxRequest)
+      returns (com.xtdb.protos.EntityTxResponse);
 }
