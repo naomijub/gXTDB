@@ -1,6 +1,5 @@
 (ns gxtdb.controllers
-  (:require [clojure.pprint :as pprint]
-            [gxtdb.adapters.db :refer [->db-basis]]
+  (:require [gxtdb.adapters.db :refer [->db-basis]]
             [gxtdb.adapters.entity :refer [entity-tx->proto]]
             [gxtdb.adapters.tx-log :as tx-log-adapter]
             [gxtdb.logic.time :refer [assoc-some-time]]

@@ -11,8 +11,9 @@
 
 ;; Setup.
 (def ^:dynamic *opts* {})
+(def node (xt/start-node *opts*))
 
-(defonce xtdb-server (service/grpc-routes (xt/start-node *opts*)))
+(defonce xtdb-server (service/grpc-routes node))
 
 (def test-env (atom {}))
 
@@ -83,12 +84,12 @@
 (deftest entity-tx-test
   (testing "query of entity tx status after a simple put - no open snapshot"
     (let [connected @(connect {:uri (str "http://localhost:" (:port @test-env))})
-          e-tx  (do
-                  @(client/SubmitTx
-                    connected
-                    {:tx-ops [{:transaction-type
-                               {:put {:id-type :string, :xt-id "id1", :document {:fields {"key" {:kind {:string-value "value"}}}}}}}]})
-                  @(client/EntityTx
-                    connected
-                    {:id-type :string :entity-id "id1" :open-snapshot false :valid-time {:value {:none {}}} :tx-time {:value {:none {}}} :tx-id {:value {:none {}}}}))]
+          put_tx @(client/SubmitTx
+                   connected
+                   {:tx-ops [{:transaction-type
+                              {:put {:id-type :string, :xt-id "id1", :document {:fields {"key" {:kind {:string-value "value"}}}}}}}]})
+          _await (xt/await-tx node put_tx)
+          e-tx        @(client/EntityTx
+                        connected
+                        {:id-type :string :entity-id "id1" :open-snapshot false :valid-time {:value {:none {}}} :tx-time {:value {:none {}}} :tx-id {:value {:none {}}}})]
       (is (= '(:xt-id :content-hash :valid-time :tx-time :tx-id) (keys e-tx))))))
