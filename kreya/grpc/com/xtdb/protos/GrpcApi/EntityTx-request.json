@@ -1,0 +1,14 @@
+{
+  "idType": "Keyword",
+  "entityId": "id1",
+  "openSnapshot": false,
+  "txId": {
+    "none": {}
+  },
+  "validTime": {
+    "none": {}
+  },
+  "txTime": {
+    "none": {}
+  }
+}

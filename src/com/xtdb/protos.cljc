@@ -32,6 +32,9 @@
 (declare cis->Put)
 (declare ecis->Put)
 (declare new-Put)
+(declare cis->OptionInt64)
+(declare ecis->OptionInt64)
+(declare new-OptionInt64)
 (declare cis->Delete)
 (declare ecis->Delete)
 (declare new-Delete)
@@ -44,6 +47,12 @@
 (declare cis->OptionDatetime)
 (declare ecis->OptionDatetime)
 (declare new-OptionDatetime)
+(declare cis->EntityTxRequest)
+(declare ecis->EntityTxRequest)
+(declare new-EntityTxRequest)
+(declare cis->EntityTxResponse)
+(declare ecis->EntityTxResponse)
+(declare new-EntityTxResponse)
 (declare cis->Transaction)
 (declare ecis->Transaction)
 (declare new-Transaction)
@@ -84,6 +93,27 @@
   ([tag value os] (write-IdType tag {:optimize false} value os))
   ([tag options value os]
    (serdes.core/write-Enum tag options (get-IdType value) os)))
+
+;;----------------------------------------------------------------------------------
+;;----------------------------------------------------------------------------------
+;; OptionInt64-value's oneof Implementations
+;;----------------------------------------------------------------------------------
+;;----------------------------------------------------------------------------------
+
+(defn convert-OptionInt64-value [origkeyval]
+  (cond
+    (get-in origkeyval [:value :none]) (update-in origkeyval [:value :none] new-Empty)
+    (get-in origkeyval [:value :some]) origkeyval
+    :default origkeyval))
+
+(defn write-OptionInt64-value [value os]
+  (let [field (first value)
+        k (when-not (nil? field) (key field))
+        v (when-not (nil? field) (val field))]
+    (case k
+      :none (serdes.core/write-embedded 1 v os)
+      :some (serdes.core/write-Int64 2  {:optimize false} v os)
+      nil)))
 
 ;;----------------------------------------------------------------------------------
 ;;----------------------------------------------------------------------------------
@@ -343,6 +373,47 @@
 (def ^:protojure.protobuf.any/record Put-meta {:type "com.xtdb.protos.Put" :decoder pb->Put})
 
 ;-----------------------------------------------------------------------------
+; OptionInt64
+;-----------------------------------------------------------------------------
+(defrecord OptionInt64-record [value]
+  pb/Writer
+  (serialize [this os]
+    (write-OptionInt64-value  (:value this) os))
+  pb/TypeReflection
+  (gettype [this]
+    "com.xtdb.protos.OptionInt64"))
+
+(s/def ::OptionInt64-spec (s/keys :opt-un []))
+(def OptionInt64-defaults {})
+
+(defn cis->OptionInt64
+  "CodedInputStream to OptionInt64"
+  [is]
+  (map->OptionInt64-record (tag-map OptionInt64-defaults (fn [tag index] (case index 1 [:value {:none (ecis->Empty is)}] 2 [:value {:some (serdes.core/cis->Int64 is)}] [index (serdes.core/cis->undefined tag is)])) is)))
+
+(defn ecis->OptionInt64
+  "Embedded CodedInputStream to OptionInt64"
+  [is]
+  (serdes.core/cis->embedded cis->OptionInt64 is))
+
+(defn new-OptionInt64
+  "Creates a new instance from a map, similar to map->OptionInt64 except that
+  it properly accounts for nested messages, when applicable.
+  "
+  [init]
+  {:pre [(if (s/valid? ::OptionInt64-spec init) true (throw (ex-info "Invalid input" (s/explain-data ::OptionInt64-spec init))))]}
+  (-> (merge OptionInt64-defaults init)
+      (convert-OptionInt64-value)
+      (map->OptionInt64-record)))
+
+(defn pb->OptionInt64
+  "Protobuf to OptionInt64"
+  [input]
+  (cis->OptionInt64 (serdes.stream/new-cis input)))
+
+(def ^:protojure.protobuf.any/record OptionInt64-meta {:type "com.xtdb.protos.OptionInt64" :decoder pb->OptionInt64})
+
+;-----------------------------------------------------------------------------
 ; Delete
 ;-----------------------------------------------------------------------------
 (defrecord Delete-record [document-id id-type valid-time end-valid-time]
@@ -515,6 +586,106 @@
   (cis->OptionDatetime (serdes.stream/new-cis input)))
 
 (def ^:protojure.protobuf.any/record OptionDatetime-meta {:type "com.xtdb.protos.OptionDatetime" :decoder pb->OptionDatetime})
+
+;-----------------------------------------------------------------------------
+; EntityTxRequest
+;-----------------------------------------------------------------------------
+(defrecord EntityTxRequest-record [id-type entity-id open-snapshot tx-id valid-time tx-time]
+  pb/Writer
+  (serialize [this os]
+    (write-IdType 1  {:optimize true} (:id-type this) os)
+    (serdes.core/write-String 2  {:optimize true} (:entity-id this) os)
+    (serdes.core/write-Bool 3  {:optimize true} (:open-snapshot this) os)
+    (serdes.core/write-embedded 4 (:tx-id this) os)
+    (serdes.core/write-embedded 5 (:valid-time this) os)
+    (serdes.core/write-embedded 6 (:tx-time this) os))
+  pb/TypeReflection
+  (gettype [this]
+    "com.xtdb.protos.EntityTxRequest"))
+
+(s/def :com.xtdb.protos.EntityTxRequest/id-type (s/or :keyword keyword? :int int?))
+(s/def :com.xtdb.protos.EntityTxRequest/entity-id string?)
+(s/def :com.xtdb.protos.EntityTxRequest/open-snapshot boolean?)
+
+(s/def ::EntityTxRequest-spec (s/keys :opt-un [:com.xtdb.protos.EntityTxRequest/id-type :com.xtdb.protos.EntityTxRequest/entity-id :com.xtdb.protos.EntityTxRequest/open-snapshot]))
+(def EntityTxRequest-defaults {:id-type IdType-default :entity-id "" :open-snapshot false})
+
+(defn cis->EntityTxRequest
+  "CodedInputStream to EntityTxRequest"
+  [is]
+  (map->EntityTxRequest-record (tag-map EntityTxRequest-defaults (fn [tag index] (case index 1 [:id-type (cis->IdType is)] 2 [:entity-id (serdes.core/cis->String is)] 3 [:open-snapshot (serdes.core/cis->Bool is)] 4 [:tx-id (ecis->OptionInt64 is)] 5 [:valid-time (ecis->OptionDatetime is)] 6 [:tx-time (ecis->OptionDatetime is)] [index (serdes.core/cis->undefined tag is)])) is)))
+
+(defn ecis->EntityTxRequest
+  "Embedded CodedInputStream to EntityTxRequest"
+  [is]
+  (serdes.core/cis->embedded cis->EntityTxRequest is))
+
+(defn new-EntityTxRequest
+  "Creates a new instance from a map, similar to map->EntityTxRequest except that
+  it properly accounts for nested messages, when applicable.
+  "
+  [init]
+  {:pre [(if (s/valid? ::EntityTxRequest-spec init) true (throw (ex-info "Invalid input" (s/explain-data ::EntityTxRequest-spec init))))]}
+  (-> (merge EntityTxRequest-defaults init)
+      (cond-> (some? (get init :tx-id)) (update :tx-id new-OptionInt64))
+      (cond-> (some? (get init :valid-time)) (update :valid-time new-OptionDatetime))
+      (cond-> (some? (get init :tx-time)) (update :tx-time new-OptionDatetime))
+      (map->EntityTxRequest-record)))
+
+(defn pb->EntityTxRequest
+  "Protobuf to EntityTxRequest"
+  [input]
+  (cis->EntityTxRequest (serdes.stream/new-cis input)))
+
+(def ^:protojure.protobuf.any/record EntityTxRequest-meta {:type "com.xtdb.protos.EntityTxRequest" :decoder pb->EntityTxRequest})
+
+;-----------------------------------------------------------------------------
+; EntityTxResponse
+;-----------------------------------------------------------------------------
+(defrecord EntityTxResponse-record [xt-id content-hash valid-time tx-time tx-id]
+  pb/Writer
+  (serialize [this os]
+    (serdes.core/write-String 1  {:optimize true} (:xt-id this) os)
+    (serdes.core/write-String 2  {:optimize true} (:content-hash this) os)
+    (serdes.core/write-String 3  {:optimize true} (:valid-time this) os)
+    (serdes.core/write-String 4  {:optimize true} (:tx-time this) os)
+    (serdes.core/write-Int64 5  {:optimize true} (:tx-id this) os))
+  pb/TypeReflection
+  (gettype [this]
+    "com.xtdb.protos.EntityTxResponse"))
+
+(s/def :com.xtdb.protos.EntityTxResponse/xt-id string?)
+(s/def :com.xtdb.protos.EntityTxResponse/content-hash string?)
+(s/def :com.xtdb.protos.EntityTxResponse/valid-time string?)
+(s/def :com.xtdb.protos.EntityTxResponse/tx-time string?)
+(s/def :com.xtdb.protos.EntityTxResponse/tx-id int?)
+(s/def ::EntityTxResponse-spec (s/keys :opt-un [:com.xtdb.protos.EntityTxResponse/xt-id :com.xtdb.protos.EntityTxResponse/content-hash :com.xtdb.protos.EntityTxResponse/valid-time :com.xtdb.protos.EntityTxResponse/tx-time :com.xtdb.protos.EntityTxResponse/tx-id]))
+(def EntityTxResponse-defaults {:xt-id "" :content-hash "" :valid-time "" :tx-time "" :tx-id 0})
+
+(defn cis->EntityTxResponse
+  "CodedInputStream to EntityTxResponse"
+  [is]
+  (map->EntityTxResponse-record (tag-map EntityTxResponse-defaults (fn [tag index] (case index 1 [:xt-id (serdes.core/cis->String is)] 2 [:content-hash (serdes.core/cis->String is)] 3 [:valid-time (serdes.core/cis->String is)] 4 [:tx-time (serdes.core/cis->String is)] 5 [:tx-id (serdes.core/cis->Int64 is)] [index (serdes.core/cis->undefined tag is)])) is)))
+
+(defn ecis->EntityTxResponse
+  "Embedded CodedInputStream to EntityTxResponse"
+  [is]
+  (serdes.core/cis->embedded cis->EntityTxResponse is))
+
+(defn new-EntityTxResponse
+  "Creates a new instance from a map, similar to map->EntityTxResponse except that
+  it properly accounts for nested messages, when applicable.
+  "
+  [init]
+  {:pre [(if (s/valid? ::EntityTxResponse-spec init) true (throw (ex-info "Invalid input" (s/explain-data ::EntityTxResponse-spec init))))]}
+  (map->EntityTxResponse-record (merge EntityTxResponse-defaults init)))
+
+(defn pb->EntityTxResponse
+  "Protobuf to EntityTxResponse"
+  [input]
+  (cis->EntityTxResponse (serdes.stream/new-cis input)))
+
+(def ^:protojure.protobuf.any/record EntityTxResponse-meta {:type "com.xtdb.protos.EntityTxResponse" :decoder pb->EntityTxResponse})
 
 ;-----------------------------------------------------------------------------
 ; Transaction

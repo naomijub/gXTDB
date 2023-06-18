@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package com.xtdb.protos;
+import "common.proto";
+
+message EntityTxResponse {
+    string xt_id = 1;
+    string content_hash = 2;
+    string valid_time = 3;
+    string tx_time = 4;
+    int64 tx_id = 5;
+}
+
+message EntityTxRequest {
+    IdType id_type = 1;
+    string entity_id = 2;
+    bool open_snapshot = 3;
+    OptionInt64 tx_id = 4;
+    OptionDatetime valid_time = 5;
+    OptionDatetime tx_time = 6;
+}

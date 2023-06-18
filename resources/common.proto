@@ -2,7 +2,21 @@ syntax = "proto3";
 
 package com.xtdb.protos;
 
+enum IdType {
+  Uuid = 0;
+  Keyword = 1;
+  String = 2;
+  Int = 3;
+}
+
 message Empty {}
+
+message OptionInt64 {
+  oneof value {
+    Empty none = 1;
+    int64 some = 2;
+  }
+}
 
 message OptionString {
     oneof value {

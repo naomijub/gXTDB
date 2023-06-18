@@ -1,17 +1,18 @@
 (ns gxtdb.service-test
-  (:require [clojure.test :refer [deftest testing is use-fixtures]]
+  (:require [clojure.test :refer [deftest is testing use-fixtures]]
             [com.xtdb.protos.GrpcApi.client :as client]
+            [gxtdb.service :as service]
+            [gxtdb.utils :as utils :refer [->inst]]
             [io.pedestal.http :as pedestal]
             [protojure.grpc.client.providers.http2 :refer [connect]]
             [protojure.pedestal.core :as protojure.pedestal]
-            [xtdb.api :as xt]
-            [gxtdb.service :as service]
-            [gxtdb.utils :as utils]))
+            [xtdb.api :as xt]))
 
 ;; Setup.
 (def ^:dynamic *opts* {})
+(def node (xt/start-node *opts*))
 
-(def xtdb-server (service/grpc-routes (xt/start-node *opts*)))
+(defonce xtdb-server (service/grpc-routes node))
 
 (def test-env (atom {}))
 
@@ -78,3 +79,16 @@
       (is (>=
            (:tx-id tx)
            0)))))
+
+(deftest entity-tx-test
+  (testing "query of entity tx status after a simple put - no open snapshot"
+    (let [connected @(connect {:uri (str "http://localhost:" (:port @test-env))})
+          put_tx @(client/SubmitTx
+                   connected
+                   {:tx-ops [{:transaction-type
+                              {:put {:id-type :string, :xt-id "id1", :document {:fields {"key" {:kind {:string-value "value"}}}}}}}]})
+          _await (xt/await-tx node {:xtdb.api/tx-id (:tx-id put_tx), :xtdb.api/tx-time (-> put_tx :tx-time ->inst)})
+          e-tx        @(client/EntityTx
+                        connected
+                        {:id-type :string :entity-id "id1" :open-snapshot false :valid-time {:value {:none {}}} :tx-time {:value {:none {}}} :tx-id {:value {:none {}}}})]
+      (is (= '(:xt-id :content-hash :valid-time :tx-time :tx-id) (keys e-tx))))))
