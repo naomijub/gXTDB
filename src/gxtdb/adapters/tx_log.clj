@@ -60,3 +60,10 @@
 
 (defn xtdb->proto [edn]
   {:tx-time (-> edn :xtdb.api/tx-time utils/->inst-str) :tx-id (:xtdb.api/tx-id edn)})
+
+(defn speculative-tx->proto [edn]
+  {:tx-time (-> edn :tx-time utils/->inst-str)
+   :valid-time (-> edn :valid-time utils/->inst-str)
+   :tx-id (:tx-id edn)
+   :entity-cache-size (:entity-cache-size edn)
+   :batch-size (:batch-size edn)})

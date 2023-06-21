@@ -1,0 +1,12 @@
+{
+  "details": {
+    "methodFqn": "com.xtdb.protos.GrpcApi.SpeculativeTx"
+  },
+  "requests": [
+    {
+      "location": "SpeculativeTx-request.json"
+    }
+  ],
+  "operationType": "unary",
+  "invokerName": "grpc"
+}

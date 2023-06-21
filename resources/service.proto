@@ -21,6 +21,8 @@ service GrpcApi {
   rpc Status(Empty) returns (StatusResponse);
   rpc SubmitTx(com.xtdb.protos.SubmitRequest)
       returns (com.xtdb.protos.SubmitResponse);
+  rpc SpeculativeTx(com.xtdb.protos.SpeculativeTxRequest)
+      returns (com.xtdb.protos.SpeculativeTxResponse);
   rpc EntityTx(com.xtdb.protos.EntityTxRequest)
       returns (com.xtdb.protos.EntityTxResponse);
 }

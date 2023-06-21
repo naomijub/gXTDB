@@ -14,6 +14,7 @@
 (defprotocol Service
   (Status [this param])
   (SubmitTx [this param])
+  (SpeculativeTx [this param])
   (EntityTx [this param]))
 
 (def GrpcApi-service-name "com.xtdb.protos.GrpcApi")
@@ -24,6 +25,9 @@
 (defn- SubmitTx-dispatch
   [ctx request]
   (SubmitTx ctx request))
+(defn- SpeculativeTx-dispatch
+  [ctx request]
+  (SpeculativeTx ctx request))
 (defn- EntityTx-dispatch
   [ctx request]
   (EntityTx ctx request))
@@ -31,4 +35,5 @@
 (def ^:const rpc-metadata
   [{:pkg "com.xtdb.protos" :service "GrpcApi" :method "Status" :method-fn Status-dispatch :server-streaming false :client-streaming false :input pb->Empty :output new-StatusResponse}
    {:pkg "com.xtdb.protos" :service "GrpcApi" :method "SubmitTx" :method-fn SubmitTx-dispatch :server-streaming false :client-streaming false :input pb->SubmitRequest :output new-SubmitResponse}
+   {:pkg "com.xtdb.protos" :service "GrpcApi" :method "SpeculativeTx" :method-fn SpeculativeTx-dispatch :server-streaming false :client-streaming false :input pb->SpeculativeTxRequest :output new-SpeculativeTxResponse}
    {:pkg "com.xtdb.protos" :service "GrpcApi" :method "EntityTx" :method-fn EntityTx-dispatch :server-streaming false :client-streaming false :input pb->EntityTxRequest :output new-EntityTxResponse}])
