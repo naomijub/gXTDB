@@ -422,14 +422,15 @@
 ;-----------------------------------------------------------------------------
 ; SpeculativeTxResponse
 ;-----------------------------------------------------------------------------
-(defrecord SpeculativeTxResponse-record [valid-time tx-time tx-id entity-cache-size batch-size]
+(defrecord SpeculativeTxResponse-record [valid-time tx-time tx-id entity-cache-size batch-size edn-document]
   pb/Writer
   (serialize [this os]
     (serdes.core/write-String 1  {:optimize true} (:valid-time this) os)
     (serdes.core/write-String 2  {:optimize true} (:tx-time this) os)
     (serdes.core/write-Int64 3  {:optimize true} (:tx-id this) os)
     (serdes.core/write-Int32 4  {:optimize true} (:entity-cache-size this) os)
-    (serdes.core/write-Int32 5  {:optimize true} (:batch-size this) os))
+    (serdes.core/write-Int32 5  {:optimize true} (:batch-size this) os)
+    (serdes.core/write-String 6  {:optimize true} (:edn-document this) os))
   pb/TypeReflection
   (gettype [this]
     "com.xtdb.protos.SpeculativeTxResponse"))
@@ -439,13 +440,14 @@
 (s/def :com.xtdb.protos.SpeculativeTxResponse/tx-id int?)
 (s/def :com.xtdb.protos.SpeculativeTxResponse/entity-cache-size int?)
 (s/def :com.xtdb.protos.SpeculativeTxResponse/batch-size int?)
-(s/def ::SpeculativeTxResponse-spec (s/keys :opt-un [:com.xtdb.protos.SpeculativeTxResponse/valid-time :com.xtdb.protos.SpeculativeTxResponse/tx-time :com.xtdb.protos.SpeculativeTxResponse/tx-id :com.xtdb.protos.SpeculativeTxResponse/entity-cache-size :com.xtdb.protos.SpeculativeTxResponse/batch-size]))
-(def SpeculativeTxResponse-defaults {:valid-time "" :tx-time "" :tx-id 0 :entity-cache-size 0 :batch-size 0})
+(s/def :com.xtdb.protos.SpeculativeTxResponse/edn-document string?)
+(s/def ::SpeculativeTxResponse-spec (s/keys :opt-un [:com.xtdb.protos.SpeculativeTxResponse/valid-time :com.xtdb.protos.SpeculativeTxResponse/tx-time :com.xtdb.protos.SpeculativeTxResponse/tx-id :com.xtdb.protos.SpeculativeTxResponse/entity-cache-size :com.xtdb.protos.SpeculativeTxResponse/batch-size :com.xtdb.protos.SpeculativeTxResponse/edn-document]))
+(def SpeculativeTxResponse-defaults {:valid-time "" :tx-time "" :tx-id 0 :entity-cache-size 0 :batch-size 0 :edn-document ""})
 
 (defn cis->SpeculativeTxResponse
   "CodedInputStream to SpeculativeTxResponse"
   [is]
-  (map->SpeculativeTxResponse-record (tag-map SpeculativeTxResponse-defaults (fn [tag index] (case index 1 [:valid-time (serdes.core/cis->String is)] 2 [:tx-time (serdes.core/cis->String is)] 3 [:tx-id (serdes.core/cis->Int64 is)] 4 [:entity-cache-size (serdes.core/cis->Int32 is)] 5 [:batch-size (serdes.core/cis->Int32 is)] [index (serdes.core/cis->undefined tag is)])) is)))
+  (map->SpeculativeTxResponse-record (tag-map SpeculativeTxResponse-defaults (fn [tag index] (case index 1 [:valid-time (serdes.core/cis->String is)] 2 [:tx-time (serdes.core/cis->String is)] 3 [:tx-id (serdes.core/cis->Int64 is)] 4 [:entity-cache-size (serdes.core/cis->Int32 is)] 5 [:batch-size (serdes.core/cis->Int32 is)] 6 [:edn-document (serdes.core/cis->String is)] [index (serdes.core/cis->undefined tag is)])) is)))
 
 (defn ecis->SpeculativeTxResponse
   "Embedded CodedInputStream to SpeculativeTxResponse"

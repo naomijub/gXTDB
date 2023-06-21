@@ -15,7 +15,6 @@
 (defn with-tx [xtdb-node tx-ops]
   (let [tx-log (tx-log-adapter/proto->tx-log tx-ops)
         xt-response (xt/with-tx (xt/db xtdb-node) tx-log)]
-    (pprint/pprint  (-> xt-response record->map :document-store :!docs deref))
     (tx-log-adapter/speculative-tx->proto (record->map xt-response))))
 
 (defn entity-tx [xtdb-node params]

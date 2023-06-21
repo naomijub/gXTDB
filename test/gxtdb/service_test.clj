@@ -6,7 +6,8 @@
             [io.pedestal.http :as pedestal]
             [protojure.grpc.client.providers.http2 :refer [connect]]
             [protojure.pedestal.core :as protojure.pedestal]
-            [xtdb.api :as xt]))
+            [xtdb.api :as xt]
+            [clojure.string :as str]))
 
 ;; Setup.
 (def ^:dynamic *opts* {})
@@ -105,4 +106,5 @@
                            connected
                            {:tx-ops [{:transaction-type
                                       {:put {:id-type :string, :xt-id "id1", :document {:fields {"key" {:kind {:string-value "Hellow"}}}}}}}]})]
-      (is (= 2 (:tx-id with-tx))))))
+      (is (= 2 (:tx-id with-tx)))
+      (is (str/includes? (:edn-document with-tx) ":crux.db/id \"id1\"")))))

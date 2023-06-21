@@ -4,13 +4,15 @@
       "put": {
         "xtId": "id1",
         "idType":"Keyword",
-        "document": {"key": "ARROZ"}
-      }
-    },
-    {
-      "delete": {
-        "documentId": "id1",
-        "idType":"Keyword",
+        "document": {
+          "key": "ARROZ",
+          "listing": [1, 2, 3, 4],
+          "number": 3,
+          "bool?": true,
+          "map": {
+            "k2": "v2"
+          }
+        }
       }
     }
   ]

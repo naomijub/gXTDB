@@ -66,4 +66,6 @@
    :valid-time (-> edn :valid-time utils/->inst-str)
    :tx-id (:tx-id edn)
    :entity-cache-size (:entity-cache-size edn)
-   :batch-size (:batch-size edn)})
+   :batch-size (:batch-size edn)
+   :edn-document  (-> edn :document-store :!docs deref str)})
+

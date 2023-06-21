@@ -60,4 +60,5 @@ message SpeculativeTxResponse {
   int64 tx_id = 3;
   int32 entity_cache_size = 4;
   int32 batch_size = 5;
+  string edn_document = 6;
 }
