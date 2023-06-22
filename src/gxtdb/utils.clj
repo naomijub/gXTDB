@@ -1,7 +1,8 @@
 (ns gxtdb.utils
   (:require [clojure.instant :refer [read-instant-date]]
             [clojure.string :as str]
-            [xtdb.api :as xt])
+            [xtdb.api :as xt]
+            [clojure.pprint :as pprint])
   (:import java.text.SimpleDateFormat))
 
 #_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
@@ -64,3 +65,10 @@
     [false true] (xt/db xtdb-node)
     [true false] (xt/open-db xtdb-node db-basis)
     [false false] (xt/db xtdb-node db-basis)))
+
+#_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
+(defn inspect [value]
+  (println)
+  (pprint/pprint value)
+  (println)
+  value)

@@ -6,7 +6,8 @@
             [io.pedestal.http :as pedestal]
             [protojure.grpc.client.providers.http2 :refer [connect]]
             [protojure.pedestal.core :as protojure.pedestal]
-            [xtdb.api :as xt]))
+            [xtdb.api :as xt]
+            [clojure.string :as str]))
 
 ;; Setup.
 (def ^:dynamic *opts* {})
@@ -92,3 +93,18 @@
                         connected
                         {:id-type :string :entity-id "id1" :open-snapshot false :valid-time {:value {:none {}}} :tx-time {:value {:none {}}} :tx-id {:value {:none {}}}})]
       (is (= '(:xt-id :content-hash :valid-time :tx-time :tx-id) (keys e-tx))))))
+
+(deftest speculative-tx-test
+  (testing "speculative submit tx with"
+    (let [connected @(connect {:uri (str "http://localhost:" (:port @test-env))})
+          put_tx @(client/SubmitTx
+                   connected
+                   {:tx-ops [{:transaction-type
+                              {:put {:id-type :string, :xt-id "id1", :document {:fields {"key" {:kind {:string-value "value"}}}}}}}]})
+          _await (xt/await-tx node {:xtdb.api/tx-id (:tx-id put_tx), :xtdb.api/tx-time (-> put_tx :tx-time ->inst)})
+          with-tx        @(client/SpeculativeTx
+                           connected
+                           {:tx-ops [{:transaction-type
+                                      {:put {:id-type :string, :xt-id "id1", :document {:fields {"key" {:kind {:string-value "Hellow"}}}}}}}]})]
+      (is (= 2 (:tx-id with-tx)))
+      (is (str/includes? (:edn-document with-tx) ":crux.db/id \"id1\"")))))

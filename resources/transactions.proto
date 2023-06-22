@@ -49,3 +49,16 @@ message SubmitResponse {
   string tx_time = 1;
   int64 tx_id = 2;
 }
+
+message SpeculativeTxRequest { 
+  repeated Transaction tx_ops = 1;
+}
+
+message SpeculativeTxResponse {
+  string valid_time = 1;
+  string tx_time = 2;
+  int64 tx_id = 3;
+  int32 entity_cache_size = 4;
+  int32 batch_size = 5;
+  string edn_document = 6;
+}

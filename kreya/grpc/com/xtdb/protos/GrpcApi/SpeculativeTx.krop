@@ -1,10 +1,10 @@
 {
   "details": {
-    "methodFqn": "com.example.addressbook.Greeter.Hello"
+    "methodFqn": "com.xtdb.protos.GrpcApi.SpeculativeTx"
   },
   "requests": [
     {
-      "location": "Hello-request.json"
+      "location": "SpeculativeTx-request.json"
     }
   ],
   "operationType": "unary",

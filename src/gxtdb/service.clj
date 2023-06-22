@@ -31,6 +31,9 @@
   (SubmitTx [_this {{:keys [tx-ops tx-time]} :grpc-params}]
     {:status 200
      :body (controllers/submit-tx xtdb-node tx-ops tx-time)})
+  (SpeculativeTx [_this {{:keys [tx-ops]} :grpc-params}]
+    {:status 200
+     :body (controllers/with-tx xtdb-node tx-ops)})
   (EntityTx [_this {params :grpc-params}]
     {:status 200
      :body (controllers/entity-tx xtdb-node params)})

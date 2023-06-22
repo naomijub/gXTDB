@@ -22,6 +22,13 @@ impl GrpcApi for ServerMock {
         todo!()
     }
 
+    async fn speculative_tx(
+        &self,
+        _request: tonic::Request<proto_api::SpeculativeTxRequest>,
+    ) -> Result<tonic::Response<proto_api::SpeculativeTxResponse>, tonic::Status> {
+        todo!()
+    }
+
     async fn entity_tx(
         &self,
         _request: tonic::Request<proto_api::EntityTxRequest>,
