@@ -6,8 +6,8 @@ use crate::{
     proto_api::{Put, SubmitRequest, Transaction},
 };
 
-static ACTION_DATE_FORMAT: &'static str = "%Y-%m-%dT%H:%M:%S%Z";
-static DATETIME_FORMAT: &'static str = "%Y-%m-%dT%H:%M:%S";
+static ACTION_DATE_FORMAT: &str = "%Y-%m-%dT%H:%M:%S%Z";
+static DATETIME_FORMAT: &str = "%Y-%m-%dT%H:%M:%S";
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
 pub enum XtdbID {
@@ -58,6 +58,8 @@ impl From<DatalogTransaction> for Transaction {
                         id_type: (&id).into(),
                         xt_id: id.to_string(),
                         document: Some(doc),
+                        valid_time: todo!(),
+                        end_valid_time: todo!(),
                     })
                 }
             }),
@@ -81,6 +83,7 @@ impl From<Transactions> for SubmitRequest {
     fn from(value: Transactions) -> Self {
         Self {
             tx_ops: value.transactions.into_iter().map(|t| t.into()).collect(),
+            tx_time: todo!(),
         }
     }
 }
@@ -232,7 +235,7 @@ mod tests {
     //     fn match_doc<T: Serialize>(id: String, action: T) -> Action {
     //         Action::Match(edn_rs::to_string(id), edn_rs::to_string(action), None)
     //     }
-}
+//}
 
 // impl Serialize for Action {
 //     fn serialize(self) -> String {

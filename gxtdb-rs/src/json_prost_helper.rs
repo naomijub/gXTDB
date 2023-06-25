@@ -42,7 +42,7 @@ fn parser(value: serde_json::Value) -> protobuf::Value {
         };
     }
 
-    if let Some(_) = value.as_null() {
+    if value.as_null().is_some() {
         return protobuf::Value {
             kind: Some(protobuf::value::Kind::NullValue(0)),
         };
@@ -57,7 +57,7 @@ fn parser(value: serde_json::Value) -> protobuf::Value {
     if let Some(arr) = value.as_array() {
         return protobuf::Value {
             kind: Some(protobuf::value::Kind::ListValue(ListValue {
-                values: arr.into_iter().map(|v| parser(v.clone())).collect(),
+                values: arr.iter().map(|v| parser(v.clone())).collect(),
             })),
         };
     }
