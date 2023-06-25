@@ -1,5 +1,8 @@
 // use chrono::prelude::*;
 
+use chrono::{DateTime, FixedOffset};
+use tonic::Status;
+
 use crate::{
     api::google::protobuf,
     json_prost_helper::json_to_prost,
@@ -41,29 +44,39 @@ impl ToString for XtdbID {
 
 #[derive(Debug, PartialEq, Clone)]
 pub(crate) enum DatalogTransaction {
-    Put(
-        XtdbID,
-        protobuf::Struct, /*,Option<DateTime<FixedOffset>>*/
-    ),
-    // Delete(String),
+    Put {
+        id: XtdbID,
+        document: serde_json::Value,
+        valid_time: Option<DateTime<FixedOffset>>,
+        end_valid_time: Option<DateTime<FixedOffset>>
+    },
+    // //Delete(
+    // //    String,
+    //     Option<DateTime<FixedOffset>>,
+    // ),
     // Evict(String),
 }
 
-impl From<DatalogTransaction> for Transaction {
-    fn from(value: DatalogTransaction) -> Self {
-        Self {
+#[cfg(feature = "chrono")]
+impl TryFrom<DatalogTransaction> for Transaction {
+    type Error = Status;
+    fn try_from(value: DatalogTransaction) -> Result<Self, Self::Error> {
+        Ok(Self {
             transaction_type: Some(match value {
-                DatalogTransaction::Put(id, doc) => {
-                    crate::proto_api::transaction::TransactionType::Put(Put {
-                        id_type: (&id).into(),
-                        xt_id: id.to_string(),
-                        document: Some(doc),
-                        valid_time: todo!(),
-                        end_valid_time: todo!(),
-                    })
-                }
+                DatalogTransaction::Put {
+                    id,
+                    document,
+                    valid_time, 
+                    end_valid_time
+                } => crate::proto_api::transaction::TransactionType::Put(Put {
+                    id_type: (&id).into(),
+                    xt_id: id.to_string(),
+                    document: Some(json_to_prost(document)?),
+                    valid_time: valid_time.into(),
+                    end_valid_time: end_valid_time.into()
+                }),
             }),
-        }
+        })
     }
 }
 
@@ -106,19 +119,19 @@ impl Transactions {
         document: serde_json::Value,
     ) -> Result<Self, tonic::Status> {
         self.transactions
-            .push(DatalogTransaction::put(id, document)?);
+            .push(DatalogTransaction::Put(id, document, None));
         Ok(self)
     }
 
-    //     /// Appends an `DatalogTransaction::Put` that includes `date` enforcing types for `action` field to be a `T: Serialize` and `date` to be `DateTime<FixedOffset>`.
-    //     pub fn append_put_timed<T: Serialize>(
-    //         mut self,
-    //         action: T,
-    //         date: DateTime<FixedOffset>,
-    //     ) -> Self {
-    //         self.actions.push(Action::put(action).with_valid_date(date));
-    //         self
-    //     }
+    // /// Appends an `DatalogTransaction::Put` that includes `date` enforcing types for `action` field to be a `T: Serialize` and `date` to be `DateTime<FixedOffset>`.
+    // pub fn append_put_time(
+    //     mut self,
+    //     action: T,
+    //     date: DateTime<FixedOffset>,
+    // ) -> Self {
+    //     self.actions.push(DatalogTransaction::put(action, document).with_valid_date(date));
+    //     self
+    // }
 
     //     /// Appends an `Action::Delete` enforcing types for `id` field to be a `String`
     //     pub fn append_delete(mut self, id: String) -> Self {
@@ -161,67 +174,23 @@ impl Transactions {
     //     }
 }
 
-impl DatalogTransaction {
-    fn put(id: XtdbID, document: serde_json::Value) -> Result<DatalogTransaction, tonic::Status> {
-        // crate::proto_api::
-        Ok(DatalogTransaction::Put(id, json_to_prost(document)?))
-    }
-}
+// impl DatalogTransaction {
+//     fn put(id: XtdbID, document: serde_json::Value) -> Result<DatalogTransaction, tonic::Status> {
+//         // crate::proto_api::
+//         Ok(DatalogTransaction::Put(id, json_to_prost(document)))
+//     }
 
-#[cfg(test)]
-mod tests {
-    use crate::json_prost_helper::{self};
-    use serde_json::json;
-
-    use super::{DatalogTransaction, Transactions, XtdbID};
-
-    #[test]
-    fn transactions() {
-        let xtdb_id = XtdbID::String(String::from("gxtdb"));
-        let document: serde_json::Value = json!({
-            "code": 200,
-            "success": true,
-            "payload": {
-                "features": [
-                    "gxtdb-rs"
-                ]
-            }
-        });
-        let transactions = Transactions::new().append_put(xtdb_id, document);
-
-        assert_eq!(transactions.clone().unwrap(), expected_transactions());
-    }
-
-    fn expected_transactions() -> Transactions {
-        let xtdb_id = XtdbID::String(String::from("alex"));
-        let document: serde_json::Value = json!({
-            "code": 200,
-            "success": true,
-            "payload": {
-                "features": [
-                    "gxtdb-rs"
-                ]
-            }
-        });
-
-        Transactions {
-            transactions: vec![DatalogTransaction::Put(
-                xtdb_id,
-                json_prost_helper::json_to_prost(document).unwrap(),
-            )],
-        }
-    }
-}
-
-//     fn with_valid_date(self, date: DateTime<FixedOffset>) -> Action {
+//     fn with_valid_date(self, date: DateTime<FixedOffset>) -> DatalogTransaction {
 //         match self {
-//             Action::Put(action, _) => Action::Put(action, Some(date)),
-//             Action::Delete(action, _) => Action::Delete(action, Some(date)),
-//             Action::Match(id, action, _) => Action::Match(id, action, Some(date)),
+//             DatalogTransaction::Put(action, _) => DatalogTransaction::Put(action, Some(date)),
+//             DatalogTransaction::Delete(action, _) => DatalogTransaction::Delete(action, Some(date)),
+//             DatalogTransaction::Match(id, action, _) => {
+//                 DatalogTransaction::Match(id, action, Some(date))
+//             }
 //             action => action,
 //         }
 //     }
-
+// }
 //     fn delete(id: String) -> Action {
 //         Action::Delete(edn_rs::to_string(id), None)
 //     }
@@ -470,3 +439,48 @@ mod tests {
 //         last_name: String,
 //     }
 // }
+
+#[cfg(test)]
+mod tests {
+    use crate::json_prost_helper::{self};
+    use serde_json::json;
+
+    use super::{DatalogTransaction, Transactions, XtdbID};
+
+    #[test]
+    fn transactions() {
+        let xtdb_id = XtdbID::String(String::from("gxtdb"));
+        let document: serde_json::Value = json!({
+            "code": 200,
+            "success": true,
+            "payload": {
+                "features": [
+                    "gxtdb-rs"
+                ]
+            }
+        });
+        let transactions = Transactions::new().append_put(xtdb_id, document);
+
+        assert_eq!(transactions.clone().unwrap(), expected_transactions());
+    }
+
+    fn expected_transactions() -> Transactions {
+        let xtdb_id = XtdbID::String(String::from("alex"));
+        let document: serde_json::Value = json!({
+            "code": 200,
+            "success": true,
+            "payload": {
+                "features": [
+                    "gxtdb-rs"
+                ]
+            }
+        });
+
+        Transactions {
+            transactions: vec![DatalogTransaction::Put(
+                xtdb_id,
+                json_prost_helper::json_to_prost(document).unwrap(),
+            )],
+        }
+    }
+}

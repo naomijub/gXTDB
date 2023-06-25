@@ -1,0 +1,14 @@
+{
+  "settings": [
+    {
+      "options": {
+        "grpc": {
+          "mode": "grpc"
+        },
+        "rest": {
+          "pathParams": []
+        }
+      }
+    }
+  ]
+}

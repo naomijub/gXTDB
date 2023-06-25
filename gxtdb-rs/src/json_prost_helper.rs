@@ -151,16 +151,28 @@ mod tests {
         );
     }
 
-    // #[test]
-    // fn parser_array(){
-    //     let v = json!([1, 2, 3]);
-    //     assert_eq!(
-    //         parser(v),
-    //         protobuf::Value {
-    //             kind: Some(protobuf::value::Kind::ListValue(values : [1, 2, 3])),
-    //         }
-    //     );
-    // }
+    #[test]
+    fn parser_array() {
+        let v = json!([1, 2, 3]);
+        assert_eq!(
+            parser(v),
+            protobuf::Value {
+                kind: Some(protobuf::value::Kind::ListValue(protobuf::ListValue {
+                    values: vec![
+                        protobuf::Value {
+                            kind: Some(protobuf::value::Kind::NumberValue(1.))
+                        },
+                        protobuf::Value {
+                            kind: Some(protobuf::value::Kind::NumberValue(2.))
+                        },
+                        protobuf::Value {
+                            kind: Some(protobuf::value::Kind::NumberValue(3.))
+                        }
+                    ],
+                })),
+            }
+        );
+    }
 
     // #[test]
     // fn parser_map(){
