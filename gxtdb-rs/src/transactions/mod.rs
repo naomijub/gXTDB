@@ -170,9 +170,7 @@ impl DatalogTransaction {
 
 #[cfg(test)]
 mod tests {
-    use crate::{
-        json_prost_helper::{self},
-    };
+    use crate::json_prost_helper::{self};
     use serde_json::json;
 
     use super::{DatalogTransaction, Transactions, XtdbID};
@@ -215,26 +213,26 @@ mod tests {
     }
 }
 
-    //     fn with_valid_date(self, date: DateTime<FixedOffset>) -> Action {
-    //         match self {
-    //             Action::Put(action, _) => Action::Put(action, Some(date)),
-    //             Action::Delete(action, _) => Action::Delete(action, Some(date)),
-    //             Action::Match(id, action, _) => Action::Match(id, action, Some(date)),
-    //             action => action,
-    //         }
-    //     }
+//     fn with_valid_date(self, date: DateTime<FixedOffset>) -> Action {
+//         match self {
+//             Action::Put(action, _) => Action::Put(action, Some(date)),
+//             Action::Delete(action, _) => Action::Delete(action, Some(date)),
+//             Action::Match(id, action, _) => Action::Match(id, action, Some(date)),
+//             action => action,
+//         }
+//     }
 
-    //     fn delete(id: String) -> Action {
-    //         Action::Delete(edn_rs::to_string(id), None)
-    //     }
+//     fn delete(id: String) -> Action {
+//         Action::Delete(edn_rs::to_string(id), None)
+//     }
 
-    //     fn evict(id: String) -> Action {
-    //         Action::Evict(edn_rs::to_string(id))
-    //     }
+//     fn evict(id: String) -> Action {
+//         Action::Evict(edn_rs::to_string(id))
+//     }
 
-    //     fn match_doc<T: Serialize>(id: String, action: T) -> Action {
-    //         Action::Match(edn_rs::to_string(id), edn_rs::to_string(action), None)
-    //     }
+//     fn match_doc<T: Serialize>(id: String, action: T) -> Action {
+//         Action::Match(edn_rs::to_string(id), edn_rs::to_string(action), None)
+//     }
 //}
 
 // impl Serialize for Action {

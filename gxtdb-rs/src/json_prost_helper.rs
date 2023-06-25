@@ -80,7 +80,10 @@ fn parser(value: serde_json::Value) -> protobuf::Value {
 
 #[cfg(test)]
 mod tests {
-    use crate::{api::google::protobuf::{self}, json_prost_helper::parser};
+    use crate::{
+        api::google::protobuf::{self},
+        json_prost_helper::parser,
+    };
     use serde_json::json;
 
     #[test]
