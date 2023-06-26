@@ -10,8 +10,8 @@ pub fn json_to_prost(json: serde_json::Value) -> Result<protobuf::Struct, tonic:
         "Json document needs to be an JSON Object",
     ))?;
 
-    for (k, v) in json.into_iter() {
-        map.insert(k.to_owned(), parser(v.to_owned()));
+    for (k, v) in json {
+        map.insert(k.clone(), parser(v.clone()));
     }
 
     Ok(protobuf::Struct { fields: map })
@@ -30,12 +30,14 @@ fn parser(value: serde_json::Value) -> protobuf::Value {
         };
     }
 
+    #[allow(clippy::cast_precision_loss)]
     if let Some(f) = value.as_i64() {
         return protobuf::Value {
             kind: Some(protobuf::value::Kind::NumberValue(f as f64)),
         };
     }
 
+    #[allow(clippy::cast_precision_loss)]
     if let Some(f) = value.as_u64() {
         return protobuf::Value {
             kind: Some(protobuf::value::Kind::NumberValue(f as f64)),

@@ -14,6 +14,9 @@ use crate::api::com::xtdb::protos::{grpc_api_client::GrpcApiClient, Empty};
 use chrono::{FixedOffset, Utc};
 use tonic::transport::Channel;
 
+pub static ACTION_DATE_FORMAT: &str = "%Y-%m-%dT%H:%M:%S%Z";
+pub static DATETIME_FORMAT: &str = "%Y-%m-%dT%H:%M:%S";
+
 impl From<proto_api::OptionString> for Option<String> {
     fn from(value: proto_api::OptionString) -> Self {
         value.value.and_then(|val| match val {
@@ -23,12 +26,34 @@ impl From<proto_api::OptionString> for Option<String> {
     }
 }
 
+impl From<Option<String>> for proto_api::OptionString {
+    fn from(val: Option<String>) -> Self {
+        match val {
+            Some(time) => Self {
+                value: Some(api::com::xtdb::protos::option_string::Value::Some(time)),
+            },
+            None => Self { value: None },
+        }
+    }
+}
+
 impl From<proto_api::OptionDatetime> for Option<String> {
     fn from(value: proto_api::OptionDatetime) -> Self {
         value.value.and_then(|val| match val {
             proto_api::option_datetime::Value::None(_) => None,
             proto_api::option_datetime::Value::Some(s) => Some(s),
         })
+    }
+}
+
+impl From<Option<String>> for proto_api::OptionDatetime {
+    fn from(val: Option<String>) -> Self {
+        match val {
+            Some(time) => Self {
+                value: Some(api::com::xtdb::protos::option_datetime::Value::Some(time)),
+            },
+            None => Self { value: None },
+        }
     }
 }
 
@@ -51,6 +76,34 @@ impl From<proto_api::OptionDatetime> for Option<chrono::DateTime<FixedOffset>> {
                 s.parse::<chrono::DateTime<FixedOffset>>().ok()
             }
         })
+    }
+}
+
+#[cfg(feature = "chrono")]
+impl From<Option<chrono::DateTime<FixedOffset>>> for proto_api::OptionDatetime {
+    fn from(val: Option<chrono::DateTime<FixedOffset>>) -> Self {
+        match val {
+            Some(time) => Self {
+                value: Some(api::com::xtdb::protos::option_datetime::Value::Some(
+                    time.format(ACTION_DATE_FORMAT).to_string(),
+                )),
+            },
+            None => Self { value: None },
+        }
+    }
+}
+
+#[cfg(feature = "chrono")]
+impl From<Option<chrono::DateTime<Utc>>> for proto_api::OptionDatetime {
+    fn from(val: Option<chrono::DateTime<Utc>>) -> Self {
+        match val {
+            Some(time) => Self {
+                value: Some(api::com::xtdb::protos::option_datetime::Value::Some(
+                    time.format(ACTION_DATE_FORMAT).to_string(),
+                )),
+            },
+            None => Self { value: None },
+        }
     }
 }
 

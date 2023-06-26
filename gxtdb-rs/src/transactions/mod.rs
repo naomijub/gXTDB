@@ -4,13 +4,9 @@ use chrono::{DateTime, FixedOffset};
 use tonic::Status;
 
 use crate::{
-    api::google::protobuf,
     json_prost_helper::json_to_prost,
     proto_api::{Put, SubmitRequest, Transaction},
 };
-
-static ACTION_DATE_FORMAT: &str = "%Y-%m-%dT%H:%M:%S%Z";
-static DATETIME_FORMAT: &str = "%Y-%m-%dT%H:%M:%S";
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
 pub enum XtdbID {
@@ -34,10 +30,10 @@ impl From<&XtdbID> for i32 {
 impl ToString for XtdbID {
     fn to_string(&self) -> String {
         match self {
-            XtdbID::Uuid(s) => s.to_string(),
-            XtdbID::String(s) => s.to_string(),
-            XtdbID::Keyword(s) => s.to_string(),
-            XtdbID::Int(s) => s.to_string(),
+            Self::Uuid(s) => s.to_string(),
+            Self::String(s) => s.to_string(),
+            Self::Keyword(s) => s.to_string(),
+            Self::Int(s) => s.to_string(),
         }
     }
 }
@@ -48,7 +44,7 @@ pub(crate) enum DatalogTransaction {
         id: XtdbID,
         document: serde_json::Value,
         valid_time: Option<DateTime<FixedOffset>>,
-        end_valid_time: Option<DateTime<FixedOffset>>
+        end_valid_time: Option<DateTime<FixedOffset>>,
     },
     // //Delete(
     // //    String,
@@ -57,7 +53,6 @@ pub(crate) enum DatalogTransaction {
     // Evict(String),
 }
 
-#[cfg(feature = "chrono")]
 impl TryFrom<DatalogTransaction> for Transaction {
     type Error = Status;
     fn try_from(value: DatalogTransaction) -> Result<Self, Self::Error> {
@@ -66,14 +61,14 @@ impl TryFrom<DatalogTransaction> for Transaction {
                 DatalogTransaction::Put {
                     id,
                     document,
-                    valid_time, 
-                    end_valid_time
+                    valid_time,
+                    end_valid_time,
                 } => crate::proto_api::transaction::TransactionType::Put(Put {
                     id_type: (&id).into(),
                     xt_id: id.to_string(),
                     document: Some(json_to_prost(document)?),
-                    valid_time: valid_time.into(),
-                    end_valid_time: end_valid_time.into()
+                    valid_time: Some(valid_time.into()),
+                    end_valid_time: Some(end_valid_time.into()),
                 }),
             }),
         })
@@ -92,23 +87,28 @@ pub struct Transactions {
     transactions: Vec<DatalogTransaction>,
 }
 
-impl From<Transactions> for SubmitRequest {
-    fn from(value: Transactions) -> Self {
-        Self {
-            tx_ops: value.transactions.into_iter().map(|t| t.into()).collect(),
-            tx_time: todo!(),
-        }
+impl TryFrom<Transactions> for SubmitRequest {
+    type Error = Status;
+    fn try_from(value: Transactions) -> Result<Self, Self::Error> {
+        Ok(Self {
+            tx_ops: value
+                .transactions
+                .into_iter()
+                .map(Transaction::try_from)
+                .collect::<Result<Vec<Transaction>, Status>>()?,
+            tx_time: None,
+        })
     }
 }
 
 impl Transactions {
-    pub fn new() -> Self {
+    #[must_use] pub fn new() -> Self {
         Self {
             transactions: Vec::new(),
         }
     }
 
-    pub(crate) fn is_empty(&self) -> bool {
+    #[must_use] pub fn is_empty(&self) -> bool {
         self.transactions.is_empty()
     }
 
@@ -118,8 +118,12 @@ impl Transactions {
         id: XtdbID,
         document: serde_json::Value,
     ) -> Result<Self, tonic::Status> {
-        self.transactions
-            .push(DatalogTransaction::Put(id, document, None));
+        self.transactions.push(DatalogTransaction::Put {
+            id,
+            document,
+            valid_time: None,
+            end_valid_time: None,
+        });
         Ok(self)
     }
 
@@ -442,7 +446,6 @@ impl Transactions {
 
 #[cfg(test)]
 mod tests {
-    use crate::json_prost_helper::{self};
     use serde_json::json;
 
     use super::{DatalogTransaction, Transactions, XtdbID};
@@ -461,11 +464,11 @@ mod tests {
         });
         let transactions = Transactions::new().append_put(xtdb_id, document);
 
-        assert_eq!(transactions.clone().unwrap(), expected_transactions());
+        assert_eq!(transactions.unwrap(), expected_transactions());
     }
 
     fn expected_transactions() -> Transactions {
-        let xtdb_id = XtdbID::String(String::from("alex"));
+        let xtdb_id = XtdbID::String(String::from("gxtdb"));
         let document: serde_json::Value = json!({
             "code": 200,
             "success": true,
@@ -477,10 +480,12 @@ mod tests {
         });
 
         Transactions {
-            transactions: vec![DatalogTransaction::Put(
-                xtdb_id,
-                json_prost_helper::json_to_prost(document).unwrap(),
-            )],
+            transactions: vec![DatalogTransaction::Put {
+                id: xtdb_id,
+                document,
+                valid_time: None,
+                end_valid_time: None,
+            }],
         }
     }
 }
