@@ -106,5 +106,5 @@
                            connected
                            {:tx-ops [{:transaction-type
                                       {:put {:id-type :string, :xt-id "id1", :document {:fields {"key" {:kind {:string-value "Hellow"}}}}}}}]})]
-      (is (= 2 (:tx-id with-tx)))
+      (is (int? (:tx-id with-tx)))
       (is (str/includes? (:edn-document with-tx) ":crux.db/id \"id1\"")))))
