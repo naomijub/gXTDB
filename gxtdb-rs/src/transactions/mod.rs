@@ -3,10 +3,11 @@
 use chrono::{DateTime, FixedOffset};
 use tonic::Status;
 
-use crate::{
-    json_prost_helper::json_to_prost,
-    proto_api::{Evict, Put, SubmitRequest, Transaction},
-};
+use crate::proto_api::{SubmitRequest, Transaction};
+
+use self::datalog::DatalogTransaction;
+
+mod datalog;
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
 pub enum XtdbID {
@@ -37,60 +38,6 @@ impl ToString for XtdbID {
     }
 }
 
-#[derive(Debug, PartialEq, Clone)]
-pub(crate) enum DatalogTransaction {
-    Put {
-        id: XtdbID,
-        document: serde_json::Value,
-        valid_time: Option<DateTime<FixedOffset>>,
-        end_valid_time: Option<DateTime<FixedOffset>>,
-    },
-    // Delete{
-    //     id: XtdbID,
-    //     valid_time: Option<DateTime<FixedOffset>>,
-    //     end_valid_time: Option<DateTime<FixedOffset>>,
-    // },
-    Evict {
-        id: XtdbID,
-    },
-}
-
-impl TryFrom<DatalogTransaction> for Transaction {
-    type Error = Status;
-    fn try_from(value: DatalogTransaction) -> Result<Self, Self::Error> {
-        Ok(Self {
-            transaction_type: Some(match value {
-                DatalogTransaction::Put {
-                    id,
-                    document,
-                    valid_time,
-                    end_valid_time,
-                } => crate::proto_api::transaction::TransactionType::Put(Put {
-                    id_type: (&id).into(),
-                    xt_id: id.to_string(),
-                    document: Some(json_to_prost(&document)?),
-                    valid_time: if valid_time.is_some() {
-                        Some(valid_time.into())
-                    } else {
-                        None
-                    },
-                    end_valid_time: if end_valid_time.is_some() {
-                        Some(end_valid_time.into())
-                    } else {
-                        None
-                    },
-                }),
-                DatalogTransaction::Evict { id } => {
-                    crate::proto_api::transaction::TransactionType::Evict(Evict {
-                        id_type: (&id).into(),
-                        document_id: id.to_string(),
-                    })
-                }
-            }),
-        })
-    }
-}
-
 /// Transactions to perform in XDTB. It is a builder struct to help you create a `Vec<DatalogTransaction>` for `tx_log`.
 ///
 /// Allowed actions:
@@ -98,7 +45,7 @@ impl TryFrom<DatalogTransaction> for Transaction {
 /// * `Delete` - Deletes the specific document at a given valid time. Functions are `append_delete` and `append_delete_timed`.
 /// * `Evict` - Evicts a document entirely, including all historical versions (receives only the ID to evict). Function is `append_evict`.
 /// * `Match` - Matches the current state of an entity, if the state doesn't match the provided document, the transaction will not continue. Functions are `append_match` and `append_match_timed`.
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct Transactions {
     transactions: Vec<DatalogTransaction>,
     tx_time: Option<DateTime<FixedOffset>>,
@@ -141,9 +88,47 @@ impl Transactions {
     }
 
     #[must_use]
-    /// Appends an `DatalogTransaction::Evict` enforcing types for `transaction` field to be a `T: Serialize`
+    /// Appends an `DatalogTransaction::Evict` enforcing types for `transaction`
     pub fn evict(mut self, id: XtdbID) -> Self {
         self.transactions.push(DatalogTransaction::Evict { id });
+        self
+    }
+
+    #[must_use]
+    /// Appends an `DatalogTransaction::Delete` enforcing types for `transaction`
+    pub fn delete(mut self, id: XtdbID) -> Self {
+        self.transactions.push(DatalogTransaction::Delete {
+            id,
+            valid_time: None,
+            end_valid_time: None,
+        });
+        self
+    }
+
+    #[must_use]
+    /// Appends an `DatalogTransaction::Delete` with `valid_time` enforcing types for `transaction`
+    pub fn delete_with_valid_time(mut self, id: XtdbID, valid_time: DateTime<FixedOffset>) -> Self {
+        self.transactions.push(DatalogTransaction::Delete {
+            id,
+            valid_time: Some(valid_time),
+            end_valid_time: None,
+        });
+        self
+    }
+
+    #[must_use]
+    /// Appends an `DatalogTransaction::Delete` with `valid_time` and `end_valid_time` enforcing types for `transaction`
+    pub fn delete_with_valid_time_range(
+        mut self,
+        id: XtdbID,
+        valid_time: DateTime<FixedOffset>,
+        end_valid_time: DateTime<FixedOffset>,
+    ) -> Self {
+        self.transactions.push(DatalogTransaction::Delete {
+            id,
+            valid_time: Some(valid_time),
+            end_valid_time: Some(end_valid_time),
+        });
         self
     }
 
@@ -316,6 +301,22 @@ mod tests {
         let expected = Transactions {
             transactions: vec![DatalogTransaction::Evict {
                 id: XtdbID::String("gxtdb".to_string()),
+            }],
+            tx_time: None,
+        };
+
+        assert_eq!(transactions, expected);
+    }
+
+    #[test]
+    fn simple_delete_transaction() {
+        let xtdb_id = XtdbID::String(String::from("gxtdb"));
+        let transactions = Transactions::builder().delete(xtdb_id);
+        let expected = Transactions {
+            transactions: vec![DatalogTransaction::Delete {
+                id: XtdbID::String("gxtdb".to_string()),
+                valid_time: None,
+                end_valid_time: None,
             }],
             tx_time: None,
         };
