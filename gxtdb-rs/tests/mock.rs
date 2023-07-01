@@ -19,7 +19,7 @@ impl GrpcApi for ServerMock {
         &self,
         _request: tonic::Request<proto_api::SubmitRequest>,
     ) -> Result<tonic::Response<proto_api::SubmitResponse>, tonic::Status> {
-        todo!()
+        Ok(tonic::Response::new(proto_api::SubmitResponse::default()))
     }
 
     async fn speculative_tx(

@@ -149,9 +149,9 @@ impl Client {
     /// * `submit_tx` requests endpoint `/SubmitTx` via `gRPC`. No args. Returns `SubmitResponse`.
     ///
     /// ## Arguments
-    /// 
-    /// DatalogTransactions and transaction time wraped in type [`Transactions`](transactions::Transactions)
-    /// 
+    ///
+    /// `DatalogTransactions` and transaction time wraped in type [`Transactions`](transactions::Transactions)
+    ///
     /// # Errors
     ///
     /// This function will return error [`tonic::Status`](tonic::Status).
@@ -163,6 +163,6 @@ impl Client {
         self.client
             .submit_tx(request)
             .await
-            .map(|status| status.into_inner().into())
+            .map(tonic::Response::into_inner)
     }
 }
