@@ -5,7 +5,7 @@ use tonic::Status;
 
 use crate::{
     json_prost_helper::json_to_prost,
-    proto_api::{Put, SubmitRequest, Transaction},
+    proto_api::{Evict, Put, SubmitRequest, Transaction},
 };
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
@@ -45,11 +45,14 @@ pub(crate) enum DatalogTransaction {
         valid_time: Option<DateTime<FixedOffset>>,
         end_valid_time: Option<DateTime<FixedOffset>>,
     },
-    // //Delete(
-    // //    String,
-    //     Option<DateTime<FixedOffset>>,
-    // ),
-    // Evict(String),
+    // Delete{
+    //     id: XtdbID,
+    //     valid_time: Option<DateTime<FixedOffset>>,
+    //     end_valid_time: Option<DateTime<FixedOffset>>,
+    // },
+    Evict {
+        id: XtdbID,
+    },
 }
 
 impl TryFrom<DatalogTransaction> for Transaction {
@@ -77,6 +80,12 @@ impl TryFrom<DatalogTransaction> for Transaction {
                         None
                     },
                 }),
+                DatalogTransaction::Evict { id } => {
+                    crate::proto_api::transaction::TransactionType::Evict(Evict {
+                        id_type: (&id).into(),
+                        document_id: id.to_string(),
+                    })
+                }
             }),
         })
     }
@@ -128,6 +137,13 @@ impl Transactions {
     /// Adds transaction time (`tx_time`) to `Transactions`
     pub fn tx_time(mut self, tx_time: DateTime<FixedOffset>) -> Self {
         self.tx_time = Some(tx_time);
+        self
+    }
+
+    #[must_use]
+    /// Appends an `DatalogTransaction::Evict` enforcing types for `transaction` field to be a `T: Serialize`
+    pub fn evict(mut self, id: XtdbID) -> Self {
+        self.transactions.push(DatalogTransaction::Evict { id });
         self
     }
 
@@ -291,6 +307,20 @@ mod tests {
             .put(xtdb_id, document);
 
         assert_eq!(transactions, expected_transactions_with_tx_time());
+    }
+
+    #[test]
+    fn simple_evict_transaction() {
+        let xtdb_id = XtdbID::String(String::from("gxtdb"));
+        let transactions = Transactions::builder().evict(xtdb_id);
+        let expected = Transactions {
+            transactions: vec![DatalogTransaction::Evict {
+                id: XtdbID::String("gxtdb".to_string()),
+            }],
+            tx_time: None,
+        };
+
+        assert_eq!(transactions, expected);
     }
 
     fn expected_transactions(
