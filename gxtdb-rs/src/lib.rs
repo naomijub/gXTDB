@@ -28,12 +28,9 @@ impl From<proto_api::OptionString> for Option<String> {
 
 impl From<Option<String>> for proto_api::OptionString {
     fn from(val: Option<String>) -> Self {
-        match val {
-            Some(time) => Self {
-                value: Some(api::com::xtdb::protos::option_string::Value::Some(time)),
-            },
-            None => Self { value: None },
-        }
+        val.map_or(Self { value: None }, |time| Self {
+            value: Some(api::com::xtdb::protos::option_string::Value::Some(time)),
+        })
     }
 }
 
@@ -48,12 +45,9 @@ impl From<proto_api::OptionDatetime> for Option<String> {
 
 impl From<Option<String>> for proto_api::OptionDatetime {
     fn from(val: Option<String>) -> Self {
-        match val {
-            Some(time) => Self {
-                value: Some(api::com::xtdb::protos::option_datetime::Value::Some(time)),
-            },
-            None => Self { value: None },
-        }
+        val.map_or(Self { value: None }, |time| Self {
+            value: Some(api::com::xtdb::protos::option_datetime::Value::Some(time)),
+        })
     }
 }
 
@@ -82,28 +76,22 @@ impl From<proto_api::OptionDatetime> for Option<chrono::DateTime<FixedOffset>> {
 #[cfg(feature = "chrono")]
 impl From<Option<chrono::DateTime<FixedOffset>>> for proto_api::OptionDatetime {
     fn from(val: Option<chrono::DateTime<FixedOffset>>) -> Self {
-        match val {
-            Some(time) => Self {
-                value: Some(api::com::xtdb::protos::option_datetime::Value::Some(
-                    time.format(ACTION_DATE_FORMAT).to_string(),
-                )),
-            },
-            None => Self { value: None },
-        }
+        val.map_or(Self { value: None }, |time| Self {
+            value: Some(api::com::xtdb::protos::option_datetime::Value::Some(
+                time.format(ACTION_DATE_FORMAT).to_string(),
+            )),
+        })
     }
 }
 
 #[cfg(feature = "chrono")]
 impl From<Option<chrono::DateTime<Utc>>> for proto_api::OptionDatetime {
     fn from(val: Option<chrono::DateTime<Utc>>) -> Self {
-        match val {
-            Some(time) => Self {
-                value: Some(api::com::xtdb::protos::option_datetime::Value::Some(
-                    time.format(ACTION_DATE_FORMAT).to_string(),
-                )),
-            },
-            None => Self { value: None },
-        }
+        val.map_or(Self { value: None }, |time| Self {
+            value: Some(api::com::xtdb::protos::option_datetime::Value::Some(
+                time.format(ACTION_DATE_FORMAT).to_string(),
+            )),
+        })
     }
 }
 
