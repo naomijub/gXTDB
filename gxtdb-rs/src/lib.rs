@@ -13,6 +13,7 @@ use crate::api::com::xtdb::protos::{grpc_api_client::GrpcApiClient, Empty};
 
 use chrono::{FixedOffset, Utc};
 use tonic::transport::Channel;
+use transactions::Transactions;
 
 pub static ACTION_DATE_FORMAT: &str = "%Y-%m-%dT%H:%M:%S%Z";
 pub static DATETIME_FORMAT: &str = "%Y-%m-%dT%H:%M:%S";
@@ -131,15 +132,36 @@ impl Client {
             client: GrpcApiClient::new(channel),
         }
     }
-    /// * `status` requests endpoint `/status` via `gRPC`. No args. Returns `StatusResponse`.
+
+    /// * `status` requests endpoint `/status` via `gRPC`. No args. Returns [`StatusResponse`](https://docs.xtdb.com/clients/1.23.2/http/#_response).
     ///
     /// # Errors
     ///
-    /// This function will return error `tonic::Status`.
+    /// This function will return error [`tonic::Status`](tonic::Status).
     pub async fn status(&mut self) -> Result<status::Response, tonic::Status> {
         let request = tonic::Request::new(Empty {});
         self.client
             .status(request)
+            .await
+            .map(|status| status.into_inner().into())
+    }
+
+    /// * `submit_tx` requests endpoint `/SubmitTx` via `gRPC`. No args. Returns `SubmitResponse`.
+    ///
+    /// ## Arguments
+    /// 
+    /// DatalogTransactions and transaction time wraped in type [`Transactions`](transactions::Transactions)
+    /// 
+    /// # Errors
+    ///
+    /// This function will return error [`tonic::Status`](tonic::Status).
+    pub async fn submit_tx(
+        &mut self,
+        request: Transactions,
+    ) -> Result<proto_api::SubmitResponse, tonic::Status> {
+        let request = tonic::Request::new(request.try_into()?);
+        self.client
+            .submit_tx(request)
             .await
             .map(|status| status.into_inner().into())
     }
