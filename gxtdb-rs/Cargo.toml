@@ -35,6 +35,9 @@ prost-types = { version = "0.11" }
 [build-dependencies]
 tonic-build = { version = "0.9.2", features = ["prost"] }
 
+[[example]]
+name = "datalog"
+required-features = []
 
 [[example]]
 name = "status"
