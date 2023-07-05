@@ -19,3 +19,18 @@ message EntityTxRequest {
     OptionDatetime valid_time = 5;
     OptionDatetime tx_time = 6;
 }
+
+message EntityResponse {
+    string xt_id = 1;
+    string content = 2;
+}
+
+message EntityRequest {
+    IdType id_type = 1;
+    string entity_id = 2;
+    bool open_snapshot = 3;
+    OptionInt64 tx_id = 4;
+    OptionDatetime valid_time = 5;
+    OptionDatetime tx_time = 6;
+
+}

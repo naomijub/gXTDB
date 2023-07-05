@@ -25,4 +25,6 @@ service GrpcApi {
       returns (com.xtdb.protos.SpeculativeTxResponse);
   rpc EntityTx(com.xtdb.protos.EntityTxRequest)
       returns (com.xtdb.protos.EntityTxResponse);
+  rpc Entity(com.xtdb.protos.EntityRequest)
+      returns (com.xtdb.protos.EntityResponse);
 }
