@@ -31,8 +31,15 @@ impl GrpcApi for ServerMock {
 
     async fn entity_tx(
         &self,
-        _request: tonic::Request<proto_api::EntityTxRequest>,
+        _request: tonic::Request<proto_api::EntityRequest>,
     ) -> Result<tonic::Response<proto_api::EntityTxResponse>, tonic::Status> {
+        todo!()
+    }
+
+    async fn entity(
+        &self,
+        _request: tonic::Request<proto_api::EntityRequest>,
+    ) -> Result<tonic::Response<proto_api::EntityResponse>, tonic::Status> {
         todo!()
     }
 }

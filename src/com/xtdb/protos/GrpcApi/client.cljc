@@ -61,8 +61,20 @@
          output (async/chan 1)
          desc {:service "com.xtdb.protos.GrpcApi"
                :method  "EntityTx"
-               :input   {:f com.xtdb.protos/new-EntityTxRequest :ch input}
+               :input   {:f com.xtdb.protos/new-EntityRequest :ch input}
                :output  {:f com.xtdb.protos/pb->EntityTxResponse :ch output}
+               :metadata metadata}]
+     (p/then (send-unary-params input params) (fn [_] (invoke-unary client desc output))))))
+
+(defn Entity
+  ([client params] (Entity client {} params))
+  ([client metadata params]
+   (let [input (async/chan 1)
+         output (async/chan 1)
+         desc {:service "com.xtdb.protos.GrpcApi"
+               :method  "Entity"
+               :input   {:f com.xtdb.protos/new-EntityRequest :ch input}
+               :output  {:f com.xtdb.protos/pb->EntityResponse :ch output}
                :metadata metadata}]
      (p/then (send-unary-params input params) (fn [_] (invoke-unary client desc output))))))
 

@@ -1,7 +1,7 @@
 (ns gxtdb.controllers
   (:require [clojure.pprint :as pprint]
             [gxtdb.adapters.db :refer [->db-basis]]
-            [gxtdb.adapters.entity :refer [entity-tx->proto]]
+            [gxtdb.adapters.entity :as adapters.entity]
             [gxtdb.adapters.tx-log :as tx-log-adapter]
             [gxtdb.logic.time :refer [assoc-some-time]]
             [gxtdb.utils :refer [->id open-db record->map]]
@@ -21,4 +21,10 @@
   (let [id (->id (:id-type params) (:entity-id params))
         db-basis (->db-basis params)
         db (open-db xtdb-node (:open-snapshot params) db-basis)]
-    (->> id (xt/entity-tx db) entity-tx->proto)))
+    (->> id (xt/entity-tx db) adapters.entity/entity-tx->proto)))
+
+(defn entity [xtdb-node params]
+  (let [id (->id (:id-type params) (:entity-id params))
+        db-basis (->db-basis params)
+        db (open-db xtdb-node (:open-snapshot params) db-basis)]
+    (->> id (xt/entity db) adapters.entity/entity->proto)))

@@ -37,6 +37,9 @@
   (EntityTx [_this {params :grpc-params}]
     {:status 200
      :body (controllers/entity-tx xtdb-node params)})
+  (Entity [_this {params :grpc-params}]
+    {:status 200
+     :body (controllers/entity xtdb-node params)})
   (Status
     [_this _request]
     (let [status (xt/status xtdb-node)]
