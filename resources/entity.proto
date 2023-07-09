@@ -24,5 +24,4 @@ message EntityRequest {
     OptionInt64 tx_id = 4;
     OptionDatetime valid_time = 5;
     OptionDatetime tx_time = 6;
-
 }

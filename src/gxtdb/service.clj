@@ -20,12 +20,17 @@
   [_request]
   (ring-resp/response "Hello from gxtdb, backed by Protojure Template!"))
 
-;; -- XTDB-DOCS --
-;; Available functionalities:
-;; - submittx: writes transactions in a log and returns details about the transactor.
-;; - status: return status of a xtdb-node.
+;; In-memory XTDB node
 (defonce xtdb-in-memory-node (xt/start-node {}))
 
+;; -- XTDB-DOCS --
+;; Available functionalities:
+;; - submit-tx: writes transactions in a log and returns details about the transactor.
+;; - status: return status of a xtdb-node.
+;; - speculative-tx: using `xt/with-tx` speculates a write transactions in a log and 
+;;   returns details about the transactor and the speculated result.
+;; - entity: returns an entity document.
+;; - entity-tx: return an entity transaction information.
 (deftype GrpcAPI [xtdb-node]
   api/Service
   (SubmitTx [_this {{:keys [tx-ops tx-time]} :grpc-params}]
