@@ -10,6 +10,10 @@ use super::XtdbID;
 
 #[allow(clippy::module_name_repetitions)]
 #[derive(Debug, PartialEq, Eq, Clone)]
+/// [`DatalogTransaction`](https://docs.xtdb.com/language-reference/datalog-transactions/#operations)
+/// * [`Put`](https://docs.xtdb.com/language-reference/datalog-transactions/#put)
+/// * [`Delete`](https://docs.xtdb.com/language-reference/datalog-transactions/#delete)
+/// * [`Evict`](https://docs.xtdb.com/language-reference/datalog-transactions/#evict)
 pub enum DatalogTransaction {
     Put {
         id: XtdbID,

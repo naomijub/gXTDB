@@ -37,6 +37,7 @@ impl ToString for XtdbID {
 }
 
 /// Transactions to perform in XDTB. It is a builder struct to help you create a `Vec<DatalogTransaction>` for `tx_log`.
+/// [Datalog Transactions](https://docs.xtdb.com/language-reference/datalog-transactions/#operations)
 ///
 /// Allowed actions:
 /// * `PUT` - Write a version of a document with its XT-ID. Functions are `append_put` and `append_put_timed`.
@@ -52,18 +53,25 @@ pub struct Transactions {
 impl TryFrom<Transactions> for SubmitRequest {
     type Error = Status;
     fn try_from(value: Transactions) -> Result<Self, Self::Error> {
-        Ok(Self {
-            tx_ops: value
-                .transactions
-                .into_iter()
-                .map(Transaction::try_from)
-                .collect::<Result<Vec<Transaction>, Status>>()?,
-            tx_time: None,
-        })
+        if value.is_empty() {
+            Err(Status::invalid_argument(
+                "Datalog Transactions cannot be empty".to_string(),
+            ))
+        } else {
+            Ok(Self {
+                tx_ops: value
+                    .transactions
+                    .into_iter()
+                    .map(Transaction::try_from)
+                    .collect::<Result<Vec<Transaction>, Status>>()?,
+                tx_time: None,
+            })
+        }
     }
 }
 
 impl Transactions {
+    /// Starts the datalog transactions builder, similar to a  `::new()` or `::default()`
     #[must_use]
     pub const fn builder() -> Self {
         Self {
@@ -72,6 +80,7 @@ impl Transactions {
         }
     }
 
+    // Verifies if `Transactions` is empty
     #[must_use]
     pub fn is_empty(&self) -> bool {
         self.transactions.is_empty()
@@ -79,21 +88,21 @@ impl Transactions {
 
     #[must_use]
     #[allow(clippy::missing_const_for_fn)]
-    /// Adds transaction time (`tx_time`) to `Transactions`
+    /// Adds transaction time [`tx_time`](https://docs.xtdb.com/language-reference/datalog-transactions/#transaction-time) to `Transactions`
     pub fn tx_time(mut self, tx_time: DateTime<FixedOffset>) -> Self {
         self.tx_time = Some(tx_time);
         self
     }
 
     #[must_use]
-    /// Appends an `DatalogTransaction::Evict` enforcing types for `transaction`
+    /// Appends an [`DatalogTransaction::Evict`](https://docs.xtdb.com/language-reference/datalog-transactions/#evict) enforcing types for `transaction`
     pub fn evict(mut self, id: XtdbID) -> Self {
         self.transactions.push(DatalogTransaction::Evict { id });
         self
     }
 
     #[must_use]
-    /// Appends an `DatalogTransaction::Delete` enforcing types for `transaction`
+    /// Appends an [`DatalogTransaction::Delete`](https://docs.xtdb.com/language-reference/datalog-transactions/#delete) enforcing types for `transaction`
     pub fn delete(mut self, id: XtdbID) -> Self {
         self.transactions.push(DatalogTransaction::Delete {
             id,
@@ -104,7 +113,7 @@ impl Transactions {
     }
 
     #[must_use]
-    /// Appends an `DatalogTransaction::Delete` with `valid_time` enforcing types for `transaction`
+    /// Appends an [`DatalogTransaction::Delete`](https://docs.xtdb.com/language-reference/datalog-transactions/#delete) with [`valid_time`](https://docs.xtdb.com/language-reference/datalog-transactions/#valid-times) enforcing types for `transaction`
     pub fn delete_with_valid_time(mut self, id: XtdbID, valid_time: DateTime<FixedOffset>) -> Self {
         self.transactions.push(DatalogTransaction::Delete {
             id,
@@ -115,7 +124,7 @@ impl Transactions {
     }
 
     #[must_use]
-    /// Appends an `DatalogTransaction::Delete` with `valid_time` and `end_valid_time` enforcing types for `transaction`
+    /// Appends an [`DatalogTransaction::Delete`](https://docs.xtdb.com/language-reference/datalog-transactions/#delete) with [`valid_time` and `end_valid_time`](https://docs.xtdb.com/language-reference/datalog-transactions/#valid-times) enforcing types for `transaction`
     pub fn delete_with_valid_time_range(
         mut self,
         id: XtdbID,
@@ -131,7 +140,7 @@ impl Transactions {
     }
 
     #[must_use]
-    /// Appends an `DatalogTransaction::Put` enforcing types for `transaction` field to be a `T: Serialize`
+    /// Appends an [`DatalogTransaction::Put`](https://docs.xtdb.com/language-reference/datalog-transactions/#put) enforcing types for `transaction` field to be a `T: Serialize`
     pub fn put(mut self, id: XtdbID, document: serde_json::Value) -> Self {
         self.transactions.push(DatalogTransaction::Put {
             id,
@@ -143,7 +152,7 @@ impl Transactions {
     }
 
     #[must_use]
-    /// Appends an `DatalogTransaction::Put` with `valid_time` enforcing types for `transaction` field to be a `T: Serialize`
+    /// Appends an [`DatalogTransaction::Put`](https://docs.xtdb.com/language-reference/datalog-transactions/#put) with [`valid_time`](https://docs.xtdb.com/language-reference/datalog-transactions/#valid-times) enforcing types for `transaction` field to be a `T: Serialize`
     pub fn put_with_valid_time(
         mut self,
         id: XtdbID,
@@ -160,7 +169,7 @@ impl Transactions {
     }
 
     #[must_use]
-    /// Appends an `DatalogTransaction::Put` with `valid_time` and `end_valid_time` enforcing types for `transaction` field to be a `T: Serialize`
+    /// Appends an [`DatalogTransaction::Put`](https://docs.xtdb.com/language-reference/datalog-transactions/#put) with [`valid_time` and `end_valid_time`](https://docs.xtdb.com/language-reference/datalog-transactions/#valid-times) enforcing types for `transaction` field to be a `T: Serialize`
     pub fn put_with_valid_time_range(
         mut self,
         id: XtdbID,
@@ -183,7 +192,17 @@ mod tests {
     use chrono::{DateTime, FixedOffset};
     use serde_json::json;
 
+    use crate::proto_api::SubmitRequest;
+
     use super::{DatalogTransaction, Transactions, XtdbID};
+
+    #[test]
+    #[should_panic]
+    fn empty_transaction_panics_when_converting_to_submit_tx() {
+        let empty_transactions = Transactions::builder();
+
+        SubmitRequest::try_from(empty_transactions).unwrap();
+    }
 
     #[test]
     fn simple_put_transaction() {

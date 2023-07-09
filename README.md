@@ -44,7 +44,7 @@ brew install protobuf
 Available endpoints
 
  - [status](gxtdb-rs/docs/gxtdb-rs.md#status-example-response)
-
+ - [submit_tx](gxtdb-rs/docs/gxtdb-rs.md#submit-tx-example-response)
 
 
 ## License
