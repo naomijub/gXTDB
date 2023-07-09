@@ -160,7 +160,7 @@ impl Client {
         &mut self,
         request: Transactions,
     ) -> Result<proto_api::SubmitResponse, tonic::Status> {
-        let request = tonic::Request::new(request.try_into()?);
+        let request = tonic::Request::new(request.build()?);
         self.client
             .submit_tx(request)
             .await

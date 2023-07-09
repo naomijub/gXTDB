@@ -86,6 +86,10 @@ impl Transactions {
         self.transactions.is_empty()
     }
 
+    pub(crate) fn build(self) -> Result<SubmitRequest, Status> {
+        self.try_into()
+    }
+
     #[must_use]
     #[allow(clippy::missing_const_for_fn)]
     /// Adds transaction time [`tx_time`](https://docs.xtdb.com/language-reference/datalog-transactions/#transaction-time) to `Transactions`
@@ -189,19 +193,18 @@ impl Transactions {
 
 #[cfg(test)]
 mod tests {
+    use super::{DatalogTransaction, Transactions, XtdbID};
     use chrono::{DateTime, FixedOffset};
     use serde_json::json;
 
-    use crate::proto_api::SubmitRequest;
-
-    use super::{DatalogTransaction, Transactions, XtdbID};
-
     #[test]
-    #[should_panic]
+    #[should_panic(
+        expected = "called `Result::unwrap()` on an `Err` value: Status { code: InvalidArgument, message: \"Datalog Transactions cannot be empty\", source: None }"
+    )]
     fn empty_transaction_panics_when_converting_to_submit_tx() {
         let empty_transactions = Transactions::builder();
 
-        SubmitRequest::try_from(empty_transactions).unwrap();
+        empty_transactions.build().unwrap();
     }
 
     #[test]
