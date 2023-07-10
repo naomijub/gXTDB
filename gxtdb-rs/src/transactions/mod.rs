@@ -189,6 +189,32 @@ impl Transactions {
         });
         self
     }
+
+    #[must_use]
+    /// Appends an [`DatalogTransaction::Match`](https://docs.xtdb.com/language-reference/datalog-transactions/#match)
+    pub fn append_match(mut self, id: XtdbID, document: serde_json::Value) -> Self {
+        self.transactions.push(DatalogTransaction::Match {
+            id,
+            document,
+            valid_time: None,
+        });
+        self
+    }
+
+    #[must_use]
+    pub fn append_match_timed(
+        mut self,
+        id: XtdbID,
+        document: serde_json::Value,
+        valid_time: DateTime<FixedOffset>,
+    ) -> Self {
+        self.transactions.push(DatalogTransaction::Match {
+            id,
+            document,
+            valid_time: Some(valid_time),
+        });
+        self
+    }
 }
 
 #[cfg(test)]
@@ -394,4 +420,7 @@ mod tests {
             }],
         }
     }
+
+    #[test]
+    fn simple_match_transaction() {}
 }
