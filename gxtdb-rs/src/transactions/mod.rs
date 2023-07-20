@@ -436,7 +436,7 @@ mod tests {
         let transactions = Transactions::builder().append_match(xtdb_id, document);
         let expected = Transactions {
             transactions: vec![DatalogTransaction::Match {
-                id:XtdbID::String(String::from("gxtdb")),
+                id: XtdbID::String(String::from("gxtdb")),
                 document: json!({
                     "code": 200,
                     "success": true,
@@ -446,11 +446,10 @@ mod tests {
                         ]
                     }
                 }),
-                valid_time: None
+                valid_time: None,
             }],
             tx_time: None,
         };
         assert_eq!(transactions, expected);
-
     }
 }

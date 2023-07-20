@@ -101,7 +101,6 @@ impl From<Option<chrono::DateTime<Utc>>> for proto_api::OptionDatetime {
 /// `Client` Contains the following functions:
 /// * `status` requests endpoint `/Status` via `gRPC`. No args expected as input
 /// * `submit_tx` requests endpoint `/SubmitTx` via `gRPC`. `DatalogTransactions` and optional transaction time are expected as input: [`Transactions`](transactions::Transactions)
-
 /// Struct to define all required paramenters to have a client.
 #[derive(Debug)]
 pub struct Client {
