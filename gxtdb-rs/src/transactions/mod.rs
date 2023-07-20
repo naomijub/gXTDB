@@ -422,5 +422,35 @@ mod tests {
     }
 
     #[test]
-    fn simple_match_transaction() {}
+    fn simple_match_transaction() {
+        let xtdb_id = XtdbID::String(String::from("gxtdb"));
+        let document: serde_json::Value = json!({
+            "code": 200,
+            "success": true,
+            "payload": {
+                "features": [
+                    "gxtdb-rs"
+                ]
+            }
+        });
+        let transactions = Transactions::builder().append_match(xtdb_id, document);
+        let expected = Transactions {
+            transactions: vec![DatalogTransaction::Match {
+                id:XtdbID::String(String::from("gxtdb")),
+                document: json!({
+                    "code": 200,
+                    "success": true,
+                    "payload": {
+                        "features": [
+                            "gxtdb-rs"
+                        ]
+                    }
+                }),
+                valid_time: None
+            }],
+            tx_time: None,
+        };
+        assert_eq!(transactions, expected);
+
+    }
 }
