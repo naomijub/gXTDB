@@ -9,6 +9,8 @@ jobs:
       image:                    xd009642/tarpaulin:develop-nightly
       options:                  --security-opt seccomp=unconfined
     steps:
+      - name: Install Protoc
+        uses: arduino/setup-protoc@v1
       - name:                   Checkout repository
         uses:                   actions/checkout@v2
 
