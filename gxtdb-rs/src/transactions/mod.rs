@@ -189,6 +189,33 @@ impl Transactions {
         });
         self
     }
+
+    #[must_use]
+    /// Appends an [`DatalogTransaction::Match`](https://docs.xtdb.com/language-reference/datalog-transactions/#match)
+    pub fn match_tx(mut self, id: XtdbID, document: serde_json::Value) -> Self {
+        self.transactions.push(DatalogTransaction::Match {
+            id,
+            document,
+            valid_time: None,
+        });
+        self
+    }
+
+    #[must_use]
+    /// Appends an [`DatalogTransaction::Match`](https://docs.xtdb.com/language-reference/datalog-transactions/#match) with [`valid_time`](https://docs.xtdb.com/language-reference/datalog-transactions/#valid-times) enforcing types for `transaction` field to be a `T: Serialize`
+    pub fn match_with_valid_time(
+        mut self,
+        id: XtdbID,
+        document: serde_json::Value,
+        valid_time: DateTime<FixedOffset>,
+    ) -> Self {
+        self.transactions.push(DatalogTransaction::Match {
+            id,
+            document,
+            valid_time: Some(valid_time),
+        });
+        self
+    }
 }
 
 #[cfg(test)]
@@ -393,5 +420,37 @@ mod tests {
                 end_valid_time: None,
             }],
         }
+    }
+
+    #[test]
+    fn simple_match_transaction() {
+        let xtdb_id = XtdbID::String(String::from("gxtdb"));
+        let document: serde_json::Value = json!({
+            "code": 200,
+            "success": true,
+            "payload": {
+                "features": [
+                    "gxtdb-rs"
+                ]
+            }
+        });
+        let transactions = Transactions::builder().match_tx(xtdb_id, document);
+        let expected = Transactions {
+            transactions: vec![DatalogTransaction::Match {
+                id: XtdbID::String(String::from("gxtdb")),
+                document: json!({
+                    "code": 200,
+                    "success": true,
+                    "payload": {
+                        "features": [
+                            "gxtdb-rs"
+                        ]
+                    }
+                }),
+                valid_time: None,
+            }],
+            tx_time: None,
+        };
+        assert_eq!(transactions, expected);
     }
 }

@@ -3,7 +3,7 @@ use tonic::Status;
 
 use crate::{
     json_prost_helper::json_to_prost,
-    proto_api::{Delete, Evict, Put, Transaction},
+    proto_api::{Delete, Evict, Match, Put, Transaction},
 };
 
 use super::XtdbID;
@@ -14,6 +14,7 @@ use super::XtdbID;
 /// * [`Put`](https://docs.xtdb.com/language-reference/datalog-transactions/#put)
 /// * [`Delete`](https://docs.xtdb.com/language-reference/datalog-transactions/#delete)
 /// * [`Evict`](https://docs.xtdb.com/language-reference/datalog-transactions/#evict)
+/// * [`Mtach`](https://docs.xtdb.com/language-reference/datalog-transactions/#match)
 pub enum DatalogTransaction {
     Put {
         id: XtdbID,
@@ -28,6 +29,11 @@ pub enum DatalogTransaction {
     },
     Evict {
         id: XtdbID,
+    },
+    Match {
+        id: XtdbID,
+        document: serde_json::Value,
+        valid_time: Option<DateTime<FixedOffset>>,
     },
 }
 
@@ -76,6 +82,20 @@ impl TryFrom<DatalogTransaction> for Transaction {
                     },
                     end_valid_time: if end_valid_time.is_some() {
                         Some(end_valid_time.into())
+                    } else {
+                        None
+                    },
+                }),
+                DatalogTransaction::Match {
+                    id,
+                    document,
+                    valid_time,
+                } => crate::proto_api::transaction::TransactionType::Match(Match {
+                    id_type: (&id).into(),
+                    document_id: id.to_string(),
+                    document: Some(json_to_prost(&document)?),
+                    valid_time: if valid_time.is_some() {
+                        Some(valid_time.into())
                     } else {
                         None
                     },
