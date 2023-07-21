@@ -1,5 +1,8 @@
-name: Security audit
+name: Security audit    
+
 on:
+  schedule:
+    - cron: '0 0 * * 0'
   push:
     paths: 
       - '**/Cargo.toml'
@@ -12,3 +15,4 @@ jobs:
       - uses: rustsec/audit-check@v1.4.1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          
