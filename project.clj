@@ -7,6 +7,7 @@
             :key "mit"}
   :plugins [[lein-cljfmt "0.9.2"]
             [lein-kibit "0.1.8"]
+            [lein-cloverage "1.2.4"]
             [jonase/eastwood "1.4.0"]]
   :dependencies [[org.clojure/clojure "1.11.0"]
                  [com.xtdb/xtdb-core "1.22.1"]

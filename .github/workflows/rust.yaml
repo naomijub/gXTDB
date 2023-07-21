@@ -42,6 +42,16 @@ jobs:
     - name: FMT
       run: cargo fmt -- --check
 
+  outdated:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install
+      run: cargo install --locked cargo-outdated
+    - name: outdated
+      run: cargo outdated -R
+
   clippy:
     runs-on: ubuntu-latest
 
