@@ -7,18 +7,35 @@ on:
     branches: [ "*" ]
 
 jobs:
-  test:
-    name:                       coverage
+  rs-coverage:
+    name:                       rs-coverage
     runs-on:                    ubuntu-latest
 
     steps:
       - name:                   Checkout repository
         uses:                   actions/checkout@v2
 
-      - name:                   Generate code coverage
+      - name:                   Generate code rs-coverage
         run: |
           cargo install cargo-tarpaulin
           cargo tarpaulin --verbose --features "json" --workspace --timeout 300 --out Xml
+
+      - name:                   Upload to codecov.io
+        uses:                   codecov/codecov-action@v1
+        with:
+          token:                ${{secrets.CODECOV_TOKEN}} 
+          fail_ci_if_error:     true
+
+  clj-coverage:
+    name:    clj-coverage
+    runs-on:  ubuntu-latest
+
+    steps:
+      - name:                   Checkout repository
+        uses:                   actions/checkout@v2
+
+      - name:                   Generate code clj-coverage
+        run: CLOVERAGE_VERSION=1.1.1 lein cloverage --codecov
 
       - name:                   Upload to codecov.io
         uses:                   codecov/codecov-action@v1
