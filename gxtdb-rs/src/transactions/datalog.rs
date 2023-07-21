@@ -14,6 +14,7 @@ use super::XtdbID;
 /// * [`Put`](https://docs.xtdb.com/language-reference/datalog-transactions/#put)
 /// * [`Delete`](https://docs.xtdb.com/language-reference/datalog-transactions/#delete)
 /// * [`Evict`](https://docs.xtdb.com/language-reference/datalog-transactions/#evict)
+/// * [`Mtach`](https://docs.xtdb.com/language-reference/datalog-transactions/#match)
 pub enum DatalogTransaction {
     Put {
         id: XtdbID,

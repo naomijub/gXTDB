@@ -192,7 +192,7 @@ impl Transactions {
 
     #[must_use]
     /// Appends an [`DatalogTransaction::Match`](https://docs.xtdb.com/language-reference/datalog-transactions/#match)
-    pub fn append_match(mut self, id: XtdbID, document: serde_json::Value) -> Self {
+    pub fn match_tx(mut self, id: XtdbID, document: serde_json::Value) -> Self {
         self.transactions.push(DatalogTransaction::Match {
             id,
             document,
@@ -202,7 +202,8 @@ impl Transactions {
     }
 
     #[must_use]
-    pub fn append_match_timed(
+    /// Appends an [`DatalogTransaction::Match`](https://docs.xtdb.com/language-reference/datalog-transactions/#match) with [`valid_time`](https://docs.xtdb.com/language-reference/datalog-transactions/#valid-times) enforcing types for `transaction` field to be a `T: Serialize`
+    pub fn match_with_valid_time(
         mut self,
         id: XtdbID,
         document: serde_json::Value,
@@ -433,7 +434,7 @@ mod tests {
                 ]
             }
         });
-        let transactions = Transactions::builder().append_match(xtdb_id, document);
+        let transactions = Transactions::builder().match_tx(xtdb_id, document);
         let expected = Transactions {
             transactions: vec![DatalogTransaction::Match {
                 id: XtdbID::String(String::from("gxtdb")),
