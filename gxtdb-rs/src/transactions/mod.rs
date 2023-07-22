@@ -117,33 +117,6 @@ impl Transactions {
     }
 
     #[must_use]
-    /// Appends an [`DatalogTransaction::Delete`](https://docs.xtdb.com/language-reference/datalog-transactions/#delete) with [`valid_time`](https://docs.xtdb.com/language-reference/datalog-transactions/#valid-times) enforcing types for `transaction`
-    pub fn delete_with_valid_time(mut self, id: XtdbID, valid_time: DateTime<FixedOffset>) -> Self {
-        self.transactions.push(DatalogTransaction::Delete {
-            id,
-            valid_time: Some(valid_time),
-            end_valid_time: None,
-        });
-        self
-    }
-
-    #[must_use]
-    /// Appends an [`DatalogTransaction::Delete`](https://docs.xtdb.com/language-reference/datalog-transactions/#delete) with [`valid_time` and `end_valid_time`](https://docs.xtdb.com/language-reference/datalog-transactions/#valid-times) enforcing types for `transaction`
-    pub fn delete_with_valid_time_range(
-        mut self,
-        id: XtdbID,
-        valid_time: DateTime<FixedOffset>,
-        end_valid_time: DateTime<FixedOffset>,
-    ) -> Self {
-        self.transactions.push(DatalogTransaction::Delete {
-            id,
-            valid_time: Some(valid_time),
-            end_valid_time: Some(end_valid_time),
-        });
-        self
-    }
-
-    #[must_use]
     /// Appends an [`DatalogTransaction::Put`](https://docs.xtdb.com/language-reference/datalog-transactions/#put) enforcing types for `transaction` field to be a `T: Serialize`
     pub fn put(mut self, id: XtdbID, document: serde_json::Value) -> Self {
         self.transactions.push(DatalogTransaction::Put {
@@ -151,41 +124,6 @@ impl Transactions {
             document,
             valid_time: None,
             end_valid_time: None,
-        });
-        self
-    }
-
-    #[must_use]
-    /// Appends an [`DatalogTransaction::Put`](https://docs.xtdb.com/language-reference/datalog-transactions/#put) with [`valid_time`](https://docs.xtdb.com/language-reference/datalog-transactions/#valid-times) enforcing types for `transaction` field to be a `T: Serialize`
-    pub fn put_with_valid_time(
-        mut self,
-        id: XtdbID,
-        document: serde_json::Value,
-        valid_time: DateTime<FixedOffset>,
-    ) -> Self {
-        self.transactions.push(DatalogTransaction::Put {
-            id,
-            document,
-            valid_time: Some(valid_time),
-            end_valid_time: None,
-        });
-        self
-    }
-
-    #[must_use]
-    /// Appends an [`DatalogTransaction::Put`](https://docs.xtdb.com/language-reference/datalog-transactions/#put) with [`valid_time` and `end_valid_time`](https://docs.xtdb.com/language-reference/datalog-transactions/#valid-times) enforcing types for `transaction` field to be a `T: Serialize`
-    pub fn put_with_valid_time_range(
-        mut self,
-        id: XtdbID,
-        document: serde_json::Value,
-        valid_time: DateTime<FixedOffset>,
-        end_valid_time: DateTime<FixedOffset>,
-    ) -> Self {
-        self.transactions.push(DatalogTransaction::Put {
-            id,
-            document,
-            valid_time: Some(valid_time),
-            end_valid_time: Some(end_valid_time),
         });
         self
     }
@@ -202,18 +140,54 @@ impl Transactions {
     }
 
     #[must_use]
-    /// Appends an [`DatalogTransaction::Match`](https://docs.xtdb.com/language-reference/datalog-transactions/#match) with [`valid_time`](https://docs.xtdb.com/language-reference/datalog-transactions/#valid-times) enforcing types for `transaction` field to be a `T: Serialize`
-    pub fn match_with_valid_time(
-        mut self,
-        id: XtdbID,
-        document: serde_json::Value,
-        valid_time: DateTime<FixedOffset>,
-    ) -> Self {
-        self.transactions.push(DatalogTransaction::Match {
-            id,
-            document,
-            valid_time: Some(valid_time),
-        });
+    /// Appends a [`valid_time`](https://docs.xtdb.com/language-reference/datalog-transactions/#valid-times) to the last `DatalogTransaction` in `Transactions`
+    pub fn valid_time(mut self, time: DateTime<FixedOffset>) -> Self {
+        if let Some(last) = self.transactions.last_mut() {
+            match last {
+                DatalogTransaction::Put { valid_time, .. }
+                | DatalogTransaction::Delete { valid_time, .. }
+                | DatalogTransaction::Match { valid_time, .. } => {
+                    *valid_time = Some(time);
+                }
+                DatalogTransaction::Evict { .. } => (),
+            }
+        };
+
+        self
+    }
+
+    #[must_use]
+    /// Appends an `end_valid_time` to the last `DatalogTransaction` in `Transactions`:
+    /// If `valid_time` exists (is Some) in the last `DatalogTransaction`, this becomes a Range of valid times between `valid_time` and `end_valid_time`.
+    /// If `valid_time` doesn't exist (is None) in the last `DatalogTrsanaction`, this becomes a `valid_time`.
+    /// [`valid_time`](https://docs.xtdb.com/language-reference/datalog-transactions/#valid-times)
+    pub fn end_valid_time(mut self, time: DateTime<FixedOffset>) -> Self {
+        if let Some(last) = self.transactions.last_mut() {
+            match last {
+                DatalogTransaction::Put {
+                    valid_time,
+                    end_valid_time,
+                    ..
+                } if valid_time.is_some() => {
+                    *end_valid_time = Some(time);
+                }
+                DatalogTransaction::Delete {
+                    valid_time,
+                    end_valid_time,
+                    ..
+                } if valid_time.is_some() => {
+                    *end_valid_time = Some(time);
+                }
+                DatalogTransaction::Put { valid_time, .. } if valid_time.is_none() => {
+                    *valid_time = Some(time);
+                }
+                DatalogTransaction::Delete { valid_time, .. } if valid_time.is_none() => {
+                    *valid_time = Some(time);
+                }
+                _ => (),
+            }
+        };
+
         self
     }
 }
@@ -263,13 +237,42 @@ mod tests {
                 ]
             }
         });
-        let transactions = Transactions::builder().put_with_valid_time(
-            xtdb_id,
-            document,
+        let transactions = Transactions::builder().put(xtdb_id, document).valid_time(
             "2014-11-28T21:00:09+09:00"
                 .parse::<DateTime<FixedOffset>>()
                 .unwrap(),
         );
+
+        assert_eq!(
+            transactions,
+            expected_transactions(
+                "2014-11-28T21:00:09+09:00"
+                    .parse::<DateTime<FixedOffset>>()
+                    .ok(),
+                None
+            )
+        );
+    }
+
+    #[test]
+    fn simple_put_with_end_valid_time_transaction() {
+        let xtdb_id = XtdbID::String(String::from("gxtdb"));
+        let document: serde_json::Value = json!({
+            "code": 200,
+            "success": true,
+            "payload": {
+                "features": [
+                    "gxtdb-rs"
+                ]
+            }
+        });
+        let transactions = Transactions::builder()
+            .put(xtdb_id, document)
+            .end_valid_time(
+                "2014-11-28T21:00:09+09:00"
+                    .parse::<DateTime<FixedOffset>>()
+                    .unwrap(),
+            );
 
         assert_eq!(
             transactions,
@@ -294,16 +297,18 @@ mod tests {
                 ]
             }
         });
-        let transactions = Transactions::builder().put_with_valid_time_range(
-            xtdb_id,
-            document,
-            "2014-11-28T21:00:09+09:00"
-                .parse::<DateTime<FixedOffset>>()
-                .unwrap(),
-            "2014-11-28T21:00:09+09:00"
-                .parse::<DateTime<FixedOffset>>()
-                .unwrap(),
-        );
+        let transactions = Transactions::builder()
+            .put(xtdb_id, document)
+            .valid_time(
+                "2014-11-28T21:00:09+09:00"
+                    .parse::<DateTime<FixedOffset>>()
+                    .unwrap(),
+            )
+            .end_valid_time(
+                "2014-11-28T21:00:09+09:00"
+                    .parse::<DateTime<FixedOffset>>()
+                    .unwrap(),
+            );
 
         assert_eq!(
             transactions,

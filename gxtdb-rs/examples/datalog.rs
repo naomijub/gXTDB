@@ -5,11 +5,13 @@ use serde_json::json;
 fn main() {
     let datalog_tx = Transactions::builder()
         .put(XtdbID::String("gXTDB".to_string()), json!({"a": 1, "b": 2}))
-        .delete_with_valid_time_range(
-            XtdbID::Int(3),
+        .delete(XtdbID::Int(3))
+        .valid_time(
             "2014-11-28T21:00:09+09:00"
                 .parse::<DateTime<FixedOffset>>()
                 .unwrap(),
+        )
+        .end_valid_time(
             "2014-11-28T21:00:09+09:00"
                 .parse::<DateTime<FixedOffset>>()
                 .unwrap(),
