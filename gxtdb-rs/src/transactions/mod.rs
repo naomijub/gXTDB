@@ -141,7 +141,7 @@ impl Transactions {
 
     #[must_use]
     /// Appends a [`valid_time`](https://docs.xtdb.com/language-reference/datalog-transactions/#valid-times) to the last `DatalogTransaction` in `Transactions`
-    pub fn valid_time(mut self, time: DateTime<FixedOffset>) -> Self {
+    pub fn with_valid_time(mut self, time: DateTime<FixedOffset>) -> Self {
         if let Some(last) = self.transactions.last_mut() {
             match last {
                 DatalogTransaction::Put { valid_time, .. }
@@ -161,7 +161,7 @@ impl Transactions {
     /// If `valid_time` exists (is Some) in the last `DatalogTransaction`, this becomes a Range of valid times between `valid_time` and `end_valid_time`.
     /// If `valid_time` doesn't exist (is None) in the last `DatalogTrsanaction`, this becomes a `valid_time`.
     /// [`valid_time`](https://docs.xtdb.com/language-reference/datalog-transactions/#valid-times)
-    pub fn end_valid_time(mut self, time: DateTime<FixedOffset>) -> Self {
+    pub fn with_end_valid_time(mut self, time: DateTime<FixedOffset>) -> Self {
         if let Some(last) = self.transactions.last_mut() {
             match last {
                 DatalogTransaction::Put {
@@ -237,11 +237,13 @@ mod tests {
                 ]
             }
         });
-        let transactions = Transactions::builder().put(xtdb_id, document).valid_time(
-            "2014-11-28T21:00:09+09:00"
-                .parse::<DateTime<FixedOffset>>()
-                .unwrap(),
-        );
+        let transactions = Transactions::builder()
+            .put(xtdb_id, document)
+            .with_valid_time(
+                "2014-11-28T21:00:09+09:00"
+                    .parse::<DateTime<FixedOffset>>()
+                    .unwrap(),
+            );
 
         assert_eq!(
             transactions,
@@ -268,7 +270,7 @@ mod tests {
         });
         let transactions = Transactions::builder()
             .put(xtdb_id, document)
-            .end_valid_time(
+            .with_end_valid_time(
                 "2014-11-28T21:00:09+09:00"
                     .parse::<DateTime<FixedOffset>>()
                     .unwrap(),
@@ -299,12 +301,12 @@ mod tests {
         });
         let transactions = Transactions::builder()
             .put(xtdb_id, document)
-            .valid_time(
+            .with_valid_time(
                 "2014-11-28T21:00:09+09:00"
                     .parse::<DateTime<FixedOffset>>()
                     .unwrap(),
             )
-            .end_valid_time(
+            .with_end_valid_time(
                 "2014-11-28T21:00:09+09:00"
                     .parse::<DateTime<FixedOffset>>()
                     .unwrap(),
