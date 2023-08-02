@@ -45,6 +45,13 @@ impl GrpcApi for ServerMock {
     ) -> Result<tonic::Response<proto_api::EntityResponse>, tonic::Status> {
         todo!()
     }
+
+    async fn db_basis(
+        &self,
+        _request: tonic::Request<proto_api::DbBasisRequest>,
+    ) -> Result<tonic::Response<proto_api::DbBasisResponse>, tonic::Status> {
+        todo!()
+    }
 }
 
 pub async fn client() -> gxtdb_rs::Client {
