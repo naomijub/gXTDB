@@ -16,7 +16,8 @@
   (SubmitTx [this param])
   (SpeculativeTx [this param])
   (EntityTx [this param])
-  (Entity [this param]))
+  (Entity [this param])
+  (DbBasis [this param]))
 
 (def GrpcApi-service-name "com.xtdb.protos.GrpcApi")
 
@@ -35,10 +36,14 @@
 (defn- Entity-dispatch
   [ctx request]
   (Entity ctx request))
+(defn- DbBasis-dispatch
+  [ctx request]
+  (DbBasis ctx request))
 
 (def ^:const rpc-metadata
   [{:pkg "com.xtdb.protos" :service "GrpcApi" :method "Status" :method-fn Status-dispatch :server-streaming false :client-streaming false :input pb->Empty :output new-StatusResponse}
    {:pkg "com.xtdb.protos" :service "GrpcApi" :method "SubmitTx" :method-fn SubmitTx-dispatch :server-streaming false :client-streaming false :input pb->SubmitRequest :output new-SubmitResponse}
    {:pkg "com.xtdb.protos" :service "GrpcApi" :method "SpeculativeTx" :method-fn SpeculativeTx-dispatch :server-streaming false :client-streaming false :input pb->SpeculativeTxRequest :output new-SpeculativeTxResponse}
    {:pkg "com.xtdb.protos" :service "GrpcApi" :method "EntityTx" :method-fn EntityTx-dispatch :server-streaming false :client-streaming false :input pb->EntityRequest :output new-EntityTxResponse}
-   {:pkg "com.xtdb.protos" :service "GrpcApi" :method "Entity" :method-fn Entity-dispatch :server-streaming false :client-streaming false :input pb->EntityRequest :output new-EntityResponse}])
+   {:pkg "com.xtdb.protos" :service "GrpcApi" :method "Entity" :method-fn Entity-dispatch :server-streaming false :client-streaming false :input pb->EntityRequest :output new-EntityResponse}
+   {:pkg "com.xtdb.protos" :service "GrpcApi" :method "DbBasis" :method-fn DbBasis-dispatch :server-streaming false :client-streaming false :input pb->DbBasisRequest :output new-DbBasisResponse}])

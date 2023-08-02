@@ -20,6 +20,9 @@
 ;;----------------------------------------------------------------------------------
 ;;----------------------------------------------------------------------------------
 
+(declare cis->DbBasisRequest)
+(declare ecis->DbBasisRequest)
+(declare new-DbBasisRequest)
 (declare cis->Empty)
 (declare ecis->Empty)
 (declare new-Empty)
@@ -41,6 +44,9 @@
 (declare cis->SpeculativeTxResponse)
 (declare ecis->SpeculativeTxResponse)
 (declare new-SpeculativeTxResponse)
+(declare cis->DbBasisResponse)
+(declare ecis->DbBasisResponse)
+(declare new-DbBasisResponse)
 (declare cis->Delete)
 (declare ecis->Delete)
 (declare new-Delete)
@@ -196,6 +202,46 @@
 ;; Message Implementations
 ;;----------------------------------------------------------------------------------
 ;;----------------------------------------------------------------------------------
+
+;-----------------------------------------------------------------------------
+; DbBasisRequest
+;-----------------------------------------------------------------------------
+(defrecord DbBasisRequest-record [open-snapshot]
+  pb/Writer
+  (serialize [this os]
+    (serdes.core/write-Bool 1  {:optimize true} (:open-snapshot this) os))
+  pb/TypeReflection
+  (gettype [this]
+    "com.xtdb.protos.DbBasisRequest"))
+
+(s/def :com.xtdb.protos.DbBasisRequest/open-snapshot boolean?)
+(s/def ::DbBasisRequest-spec (s/keys :opt-un [:com.xtdb.protos.DbBasisRequest/open-snapshot]))
+(def DbBasisRequest-defaults {:open-snapshot false})
+
+(defn cis->DbBasisRequest
+  "CodedInputStream to DbBasisRequest"
+  [is]
+  (map->DbBasisRequest-record (tag-map DbBasisRequest-defaults (fn [tag index] (case index 1 [:open-snapshot (serdes.core/cis->Bool is)] [index (serdes.core/cis->undefined tag is)])) is)))
+
+(defn ecis->DbBasisRequest
+  "Embedded CodedInputStream to DbBasisRequest"
+  [is]
+  (serdes.core/cis->embedded cis->DbBasisRequest is))
+
+(defn new-DbBasisRequest
+  "Creates a new instance from a map, similar to map->DbBasisRequest except that
+  it properly accounts for nested messages, when applicable.
+  "
+  [init]
+  {:pre [(if (s/valid? ::DbBasisRequest-spec init) true (throw (ex-info "Invalid input" (s/explain-data ::DbBasisRequest-spec init))))]}
+  (map->DbBasisRequest-record (merge DbBasisRequest-defaults init)))
+
+(defn pb->DbBasisRequest
+  "Protobuf to DbBasisRequest"
+  [input]
+  (cis->DbBasisRequest (serdes.stream/new-cis input)))
+
+(def ^:protojure.protobuf.any/record DbBasisRequest-meta {:type "com.xtdb.protos.DbBasisRequest" :decoder pb->DbBasisRequest})
 
 ;-----------------------------------------------------------------------------
 ; Empty
@@ -523,6 +569,48 @@
   (cis->SpeculativeTxResponse (serdes.stream/new-cis input)))
 
 (def ^:protojure.protobuf.any/record SpeculativeTxResponse-meta {:type "com.xtdb.protos.SpeculativeTxResponse" :decoder pb->SpeculativeTxResponse})
+
+;-----------------------------------------------------------------------------
+; DbBasisResponse
+;-----------------------------------------------------------------------------
+(defrecord DbBasisResponse-record [valid-time tx-id]
+  pb/Writer
+  (serialize [this os]
+    (serdes.core/write-String 1  {:optimize true} (:valid-time this) os)
+    (serdes.core/write-Int64 2  {:optimize true} (:tx-id this) os))
+  pb/TypeReflection
+  (gettype [this]
+    "com.xtdb.protos.DbBasisResponse"))
+
+(s/def :com.xtdb.protos.DbBasisResponse/valid-time string?)
+(s/def :com.xtdb.protos.DbBasisResponse/tx-id int?)
+(s/def ::DbBasisResponse-spec (s/keys :opt-un [:com.xtdb.protos.DbBasisResponse/valid-time :com.xtdb.protos.DbBasisResponse/tx-id]))
+(def DbBasisResponse-defaults {:valid-time "" :tx-id 0})
+
+(defn cis->DbBasisResponse
+  "CodedInputStream to DbBasisResponse"
+  [is]
+  (map->DbBasisResponse-record (tag-map DbBasisResponse-defaults (fn [tag index] (case index 1 [:valid-time (serdes.core/cis->String is)] 2 [:tx-id (serdes.core/cis->Int64 is)] [index (serdes.core/cis->undefined tag is)])) is)))
+
+(defn ecis->DbBasisResponse
+  "Embedded CodedInputStream to DbBasisResponse"
+  [is]
+  (serdes.core/cis->embedded cis->DbBasisResponse is))
+
+(defn new-DbBasisResponse
+  "Creates a new instance from a map, similar to map->DbBasisResponse except that
+  it properly accounts for nested messages, when applicable.
+  "
+  [init]
+  {:pre [(if (s/valid? ::DbBasisResponse-spec init) true (throw (ex-info "Invalid input" (s/explain-data ::DbBasisResponse-spec init))))]}
+  (map->DbBasisResponse-record (merge DbBasisResponse-defaults init)))
+
+(defn pb->DbBasisResponse
+  "Protobuf to DbBasisResponse"
+  [input]
+  (cis->DbBasisResponse (serdes.stream/new-cis input)))
+
+(def ^:protojure.protobuf.any/record DbBasisResponse-meta {:type "com.xtdb.protos.DbBasisResponse" :decoder pb->DbBasisResponse})
 
 ;-----------------------------------------------------------------------------
 ; Delete
