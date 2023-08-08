@@ -5,7 +5,7 @@ package com.xtdb.protos;
 import "transactions.proto";
 import "entity.proto";
 import "common.proto";
-
+import "dbbasis.proto";
 
 message StatusResponse {
   string version = 1;
@@ -15,15 +15,6 @@ message StatusResponse {
   int64 size = 5;
   OptionString revision = 6;
   OptionString consumer_state = 7;
-}
-
-message DbBasisRequest {
-  bool open_snapshot = 1;
-}
-
-message DbBasisResponse {
-  string valid_time = 1;
-  int64 tx_id = 2;
 }
 
 service GrpcApi {
@@ -36,6 +27,6 @@ service GrpcApi {
       returns (com.xtdb.protos.EntityTxResponse);
   rpc Entity(com.xtdb.protos.EntityRequest)
       returns (com.xtdb.protos.EntityResponse);
-  rpc DbBasis(DbBasisRequest)
-      returns(DbBasisResponse);
+  rpc DbBasis(com.xtdb.protos.DbBasisRequest)
+      returns(com.xtdb.protos.DbBasisResponse);
 }

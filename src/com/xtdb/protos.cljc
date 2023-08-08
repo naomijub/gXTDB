@@ -206,22 +206,23 @@
 ;-----------------------------------------------------------------------------
 ; DbBasisRequest
 ;-----------------------------------------------------------------------------
-(defrecord DbBasisRequest-record [open-snapshot]
+(defrecord DbBasisRequest-record [tx-id valid-time tx-time]
   pb/Writer
   (serialize [this os]
-    (serdes.core/write-Bool 1  {:optimize true} (:open-snapshot this) os))
+    (serdes.core/write-embedded 1 (:tx-id this) os)
+    (serdes.core/write-embedded 2 (:valid-time this) os)
+    (serdes.core/write-embedded 3 (:tx-time this) os))
   pb/TypeReflection
   (gettype [this]
     "com.xtdb.protos.DbBasisRequest"))
 
-(s/def :com.xtdb.protos.DbBasisRequest/open-snapshot boolean?)
-(s/def ::DbBasisRequest-spec (s/keys :opt-un [:com.xtdb.protos.DbBasisRequest/open-snapshot]))
-(def DbBasisRequest-defaults {:open-snapshot false})
+(s/def ::DbBasisRequest-spec (s/keys :opt-un []))
+(def DbBasisRequest-defaults {})
 
 (defn cis->DbBasisRequest
   "CodedInputStream to DbBasisRequest"
   [is]
-  (map->DbBasisRequest-record (tag-map DbBasisRequest-defaults (fn [tag index] (case index 1 [:open-snapshot (serdes.core/cis->Bool is)] [index (serdes.core/cis->undefined tag is)])) is)))
+  (map->DbBasisRequest-record (tag-map DbBasisRequest-defaults (fn [tag index] (case index 1 [:tx-id (ecis->OptionInt64 is)] 2 [:valid-time (ecis->OptionDatetime is)] 3 [:tx-time (ecis->OptionDatetime is)] [index (serdes.core/cis->undefined tag is)])) is)))
 
 (defn ecis->DbBasisRequest
   "Embedded CodedInputStream to DbBasisRequest"
@@ -234,7 +235,11 @@
   "
   [init]
   {:pre [(if (s/valid? ::DbBasisRequest-spec init) true (throw (ex-info "Invalid input" (s/explain-data ::DbBasisRequest-spec init))))]}
-  (map->DbBasisRequest-record (merge DbBasisRequest-defaults init)))
+  (-> (merge DbBasisRequest-defaults init)
+      (cond-> (some? (get init :tx-id)) (update :tx-id new-OptionInt64))
+      (cond-> (some? (get init :valid-time)) (update :valid-time new-OptionDatetime))
+      (cond-> (some? (get init :tx-time)) (update :tx-time new-OptionDatetime))
+      (map->DbBasisRequest-record)))
 
 (defn pb->DbBasisRequest
   "Protobuf to DbBasisRequest"
@@ -573,24 +578,26 @@
 ;-----------------------------------------------------------------------------
 ; DbBasisResponse
 ;-----------------------------------------------------------------------------
-(defrecord DbBasisResponse-record [valid-time tx-id]
+(defrecord DbBasisResponse-record [xt-id valid-time xt-tx]
   pb/Writer
   (serialize [this os]
-    (serdes.core/write-String 1  {:optimize true} (:valid-time this) os)
-    (serdes.core/write-Int64 2  {:optimize true} (:tx-id this) os))
+    (serdes.core/write-String 1  {:optimize true} (:xt-id this) os)
+    (serdes.core/write-String 2  {:optimize true} (:valid-time this) os)
+    (serdes.core/write-String 3  {:optimize true} (:xt-tx this) os))
   pb/TypeReflection
   (gettype [this]
     "com.xtdb.protos.DbBasisResponse"))
 
+(s/def :com.xtdb.protos.DbBasisResponse/xt-id string?)
 (s/def :com.xtdb.protos.DbBasisResponse/valid-time string?)
-(s/def :com.xtdb.protos.DbBasisResponse/tx-id int?)
-(s/def ::DbBasisResponse-spec (s/keys :opt-un [:com.xtdb.protos.DbBasisResponse/valid-time :com.xtdb.protos.DbBasisResponse/tx-id]))
-(def DbBasisResponse-defaults {:valid-time "" :tx-id 0})
+(s/def :com.xtdb.protos.DbBasisResponse/xt-tx string?)
+(s/def ::DbBasisResponse-spec (s/keys :opt-un [:com.xtdb.protos.DbBasisResponse/xt-id :com.xtdb.protos.DbBasisResponse/valid-time :com.xtdb.protos.DbBasisResponse/xt-tx]))
+(def DbBasisResponse-defaults {:xt-id "" :valid-time "" :xt-tx ""})
 
 (defn cis->DbBasisResponse
   "CodedInputStream to DbBasisResponse"
   [is]
-  (map->DbBasisResponse-record (tag-map DbBasisResponse-defaults (fn [tag index] (case index 1 [:valid-time (serdes.core/cis->String is)] 2 [:tx-id (serdes.core/cis->Int64 is)] [index (serdes.core/cis->undefined tag is)])) is)))
+  (map->DbBasisResponse-record (tag-map DbBasisResponse-defaults (fn [tag index] (case index 1 [:xt-id (serdes.core/cis->String is)] 2 [:valid-time (serdes.core/cis->String is)] 3 [:xt-tx (serdes.core/cis->String is)] [index (serdes.core/cis->undefined tag is)])) is)))
 
 (defn ecis->DbBasisResponse
   "Embedded CodedInputStream to DbBasisResponse"
