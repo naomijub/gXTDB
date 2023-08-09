@@ -1,7 +1,7 @@
 (ns gxtdb.adapters.db-test
   (:require [clojure.test :refer [deftest testing is]]
             [xtdb.api :as xt]
-            [gxtdb.adapters.db :as db]))
+            [gxtdb.adapters.db :refer [db-basis->proto]]))
 
 (def all-none-input
   {:valid-time {:value {:none {}}}
@@ -23,16 +23,16 @@
    :tx-time {:value {:some "2023-06-12T21:32:44.717-05:00"}}
    :tx-id {:value {:some 3}}})
 
-(deftest ->db-basis-test
+(deftest db-basis->proto-test
   (testing "When all fields are none"
-    (is (= nil (db/->db-basis all-none-input))))
+    (is (= nil (-> db-basis->proto all-none-input))))
   (testing "When all tx inputs are some"
-    (is (= nil (db/->db-basis tx-some-inputs))))
+    (is (= nil (-> db-basis->proto tx-some-inputs))))
   (testing "When only tx-id input is some"
-    (is (= {::xt/tx 3} (db/->db-basis {:tx-id {:value {:some 3}}}))))
+    (is (= (:tx_id 3) (-> db-basis->proto {:tx-id {:value {:some 3}}}))))
   (testing "When only tx-time input is some"
-    (is (= {::xt/tx-time #inst "2023-06-13T02:32:44.717-00:00"} (db/->db-basis {:tx-time {:value {:some "2023-06-12T21:32:44.717-05:00"}}}))))
+    (is (= (:tx-time #inst "2023-06-13T02:32:44.717-00:00") (-> db-basis->proto {:tx-time {:value {:some "2023-06-12T21:32:44.717-05:00"}}}))))
   (testing "When only valid-time is some"
-    (is (= {::xt/valid-time #inst "2023-06-13T02:32:44.717-00:00"} (db/->db-basis valid-time-input))))
+    (is (= (:valid-time #inst "2023-06-13T02:32:44.717-00:00") (-> db-basis->proto valid-time-input))))
   (testing "When all fields are some"
-    (is (= {::xt/valid-time #inst "2023-06-13T02:32:44.717-00:00"} (db/->db-basis all-some-input)))))
+    (is (= (:valid-time #inst "2023-06-13T02:32:44.717-00:00") (-> db-basis->proto all-some-input)))))
