@@ -2,6 +2,8 @@
 
 gRPC Plugin for XTDB
 
+**PROJECT IS ON HOLD UNTIL WE HAVE A GOOD SOLUTION FOR EDN->PROTOBUF/PROTOBUF->EDN**`
+
 ## Usage:
 
 ### Clojure:
