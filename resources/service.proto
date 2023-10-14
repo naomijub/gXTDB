@@ -5,7 +5,7 @@ package com.xtdb.protos;
 import "transactions.proto";
 import "entity.proto";
 import "common.proto";
-
+import "dbbasis.proto";
 
 message StatusResponse {
   string version = 1;
@@ -27,4 +27,6 @@ service GrpcApi {
       returns (com.xtdb.protos.EntityTxResponse);
   rpc Entity(com.xtdb.protos.EntityRequest)
       returns (com.xtdb.protos.EntityResponse);
+  rpc DbBasis(com.xtdb.protos.DbBasisRequest)
+      returns(com.xtdb.protos.DbBasisResponse);
 }

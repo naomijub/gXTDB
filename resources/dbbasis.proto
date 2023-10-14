@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package com.xtdb.protos;
+import "common.proto";
+
+message DbBasisRequest {
+    OptionInt64 tx_id = 1;
+    OptionDatetime valid_time = 2;
+    OptionDatetime tx_time = 3;
+}
+
+message DbBasisResponse {
+    string xt_id = 1;
+    string valid_time = 2;
+    string xt_tx = 3;
+}
